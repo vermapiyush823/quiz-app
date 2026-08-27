@@ -1,0 +1,701 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(164, 53, 240, 0.12);
+  border: 1px solid rgba(164, 53, 240, 0.35);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-light);
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: clamp(24px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.titleGradient {
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 680px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+.headerActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Filter Bar ──────────────────────────────────────────────── */
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.tabList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding: 2px 0;
+}
+
+.tabList::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.tabBtn {
+  padding: 8px 16px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-base);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabBtn:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.tabBtnActive {
+  background: rgba(164, 53, 240, 0.16) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-light) !important;
+  font-weight: 700;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  min-width: 220px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-base);
+  outline: none;
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.clearBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+/* ── Sections ────────────────────────────────────────────────── */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.sectionIcon {
+  font-size: 26px;
+  padding: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.4px;
+  margin-bottom: 4px;
+}
+
+.sectionSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── CSDM 5.0 CONCEPTUAL ARCHITECTURE IMAGE CARD ─────────────── */
+.imageCard {
+  background: #0f1117;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.imageToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.imageCaption {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imageWrapper {
+  padding: 16px;
+  background: #0b0d13;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.csdmImage {
+  width: 100%;
+  max-width: 1050px;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: block;
+}
+
+/* ── Section 1: CSDM 5 Stages ────────────────────────────────── */
+.stagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.stageCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top-width: 4px;
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.stageCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.stageTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stageIcon {
+  font-size: 24px;
+}
+
+.stageBadge {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stageName {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.stageDesc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.stageItems {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.stageItemsTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.stageItems ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stageItems li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding-left: 12px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.stageItems li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--primary-light);
+}
+
+/* ── Section 2: Domains Table ────────────────────────────────── */
+.tableWrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.domainTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 750px;
+}
+
+.domainTable th {
+  background: var(--bg-elevated);
+  padding: 14px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.domainTable td {
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.domainTable tr:last-child td {
+  border-bottom: none;
+}
+
+.domainTable tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.domainNameCell {
+  white-space: nowrap;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+}
+
+.cellIcon {
+  margin-right: 6px;
+  font-size: 15px;
+}
+
+.ownershipCell {
+  min-width: 180px;
+}
+
+.personaTag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(164, 53, 240, 0.1);
+  border: 1px solid rgba(164, 53, 240, 0.25);
+  border-radius: var(--radius-sm);
+  color: var(--primary-light);
+  font-weight: 600;
+  font-size: 11.5px;
+}
+
+.tableTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 200px;
+}
+
+.tableCode {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #ffc85e;
+}
+
+.purposeCell {
+  line-height: 1.55;
+  min-width: 220px;
+}
+
+/* ── Section 3: CI Relationships ─────────────────────────────── */
+.relationshipGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.relCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: var(--transition);
+}
+
+.relCard:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.relTypeBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(246, 156, 8, 0.14);
+  border: 1px solid rgba(246, 156, 8, 0.35);
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-light);
+  font-family: monospace;
+}
+
+.relDiagram {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  gap: 6px;
+}
+
+.relNode {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  flex: 1;
+}
+
+.relArrow {
+  color: var(--primary-light);
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.relExample {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.relRule {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+/* ── Section 4: Dashboard Tabs ───────────────────────────────── */
+.dashGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.dashCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashIcon {
+  font-size: 22px;
+}
+
+.dashTabTitle {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dashVisibility {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  line-height: 1.45;
+}
+
+.dashPractices {
+  font-size: 12.5px;
+}
+
+.dashPractices strong {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.dashPractices ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashPractices li {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  padding-left: 12px;
+  position: relative;
+  line-height: 1.45;
+}
+
+.dashPractices li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: bold;
+}
+
+/* ── Bottom CTA ──────────────────────────────────────────────── */
+.bottomCta {
+  background: linear-gradient(135deg, rgba(164, 53, 240, 0.18), rgba(246, 156, 8, 0.1));
+  border: 1px solid rgba(164, 53, 240, 0.35);
+  border-radius: var(--radius-xl);
+  padding: 30px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+
+.ctaIcon {
+  font-size: 40px;
+}
+
+.ctaTitle {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.ctaDesc {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── Mobile Responsive Overrides ─────────────────────────────── */
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 14px 60px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 13.5px;
+  }
+
+  .headerActions {
+    flex-direction: column;
+  }
+
+  .headerActions .btn {
+    width: 100%;
+  }
+
+  /* Filter bar mobile */
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .tabList {
+    width: 100%;
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+
+  .tabBtn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+
+  .searchBox {
+    width: 100%;
+    min-width: 100%;
+    padding: 6px 12px;
+  }
+
+  .searchInput {
+    font-size: 12px;
+  }
+
+  .imageWrapper {
+    padding: 10px;
+  }
+
+  .imageToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .imageToolbar .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .stagesGrid,
+  .relationshipGrid,
+  .dashGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottomCta {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .bottomCta .btn {
+    width: 100%;
+  }
+}

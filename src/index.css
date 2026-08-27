@@ -1,0 +1,207 @@
+/* ============================================================
+   QUIZ APP — Global Styles (Udemy-inspired dark theme)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── CSS Variables ─────────────────────────────────────────── */
+:root {
+  --primary: #a435f0;
+  --primary-dark: #8710d8;
+  --primary-light: #c56af5;
+  --primary-glow: rgba(164, 53, 240, 0.25);
+  --accent: #f69c08;
+  --accent-light: #ffc85e;
+  --success: #1db954;
+  --success-light: rgba(29, 185, 84, 0.15);
+  --error: #e74c3c;
+  --error-light: rgba(231, 76, 60, 0.15);
+  --warning: #f39c12;
+
+  --bg-base: #0d0d0d;
+  --bg-card: #161616;
+  --bg-elevated: #1c1c1c;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --bg-glass-hover: rgba(255, 255, 255, 0.08);
+
+  --text-primary: #ffffff;
+  --text-secondary: #b2b2b2;
+  --text-muted: #6b6b6b;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(164, 53, 240, 0.4);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 50px;
+
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px var(--primary-glow);
+
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --font-base: 'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --nav-height: 68px;
+}
+
+/* ─── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-base);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root { min-height: 100vh; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-light); }
+
+/* ─── Keyframe Animations ────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* ─── Utility ───────────────────────────────────────────────── */
+.animate-fadeInUp  { animation: fadeInUp 0.45s cubic-bezier(0.4,0,0.2,1) both; }
+.animate-fadeIn    { animation: fadeIn 0.35s ease both; }
+.animate-scaleIn   { animation: scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-bounceIn  { animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-elevated) 50%, var(--bg-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Shared Button Styles ──────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-base);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled:hover { transform: none; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 20px rgba(164, 53, 240, 0.35);
+}
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 8px 30px rgba(164, 53, 240, 0.55);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:not(:disabled):hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:not(:disabled):hover {
+  border-color: var(--primary);
+  color: var(--primary-light);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success), #17a845);
+  color: white;
+  box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
+}
+.btn-success:not(:disabled):hover {
+  box-shadow: 0 8px 28px rgba(29, 185, 84, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-lg { padding: 15px 34px; font-size: 16px; border-radius: var(--radius-lg); }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: var(--radius-sm); }
+
+/* ─── Scrollbar-less overflow for dot row ───────────────────── */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

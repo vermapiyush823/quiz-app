@@ -1,0 +1,446 @@
+1. A CMDB Administrator is implementing Vulnerability Response or Security Incident Response and needs to ensure customers have enough context to estimate risk and set task priorities.
+
+Which Get Well Playbook from the CSDM Data Foundations Dashboard helps with this?
+Locations without a Parent Locationwrong
+Application Services with Business Application Relationshipscorrect
+Named Product Models without Product Owners
+Percentage of Custom Status Values for CI Life Cycle Stages
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, Vulnerability Response and Security Incident Response rely heavily on business context to accurately assess risk, prioritize remediation tasks, and communicate impact to stakeholders. From a CSDM (Common Service Data Model) perspective, this context is primarily delivered through properly modeled relationships between Application Services and Business Applications.
+
+The “Application Services with Business Application Relationships” Get Well Playbook directly addresses this requirement. In CSDM, Application Services represent the technical, deployable services that run in the environment, while Business Applications represent the logical applications that support business capabilities. When these two are correctly related, security teams can clearly understand which business processes, customers, and revenue streams are affected by a vulnerability or security incident.
+
+Without this relationship, vulnerabilities may still be detected, but they lack meaningful prioritization. For example, a critical vulnerability on an application service supporting a revenue-generating or customer-facing business application should be addressed far more urgently than one
+
+tied to a low-impact internal tool. This relationship is what enables risk-based prioritization, rather than purely technical severity-based prioritization.
+
+The other options do not fulfill this need. Location hierarchy issues (Option A) and CI lifecycle status consistency (Option D) relate more to CMDB hygiene and governance, not security context. Product ownership gaps (Option C) affect accountability but do not directly enable risk estimation during security response.
+
+Therefore, Option B is the correct and CSDM-aligned Get Well Playbook for ensuring sufficient business context in Vulnerability Response and Security Incident Response workflows
+
+2. An organization is changing data centers and needs to know the consequences of the planned changes.
+
+How can Application Service Mapping be used as part of Change Management?
+To identify which devices will go offline first
+To understand the business impact of CIscorrect
+To understand the physical location of CIs
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+Application Service Mapping is a critical capability in ServiceNow for enabling business-aware Change Management. Its primary value is not in identifying physical shutdown sequences or CI locations, but in translating technical changes into business impact.
+
+When an organization plans a data center move, multiple infrastructure components―servers, databases, network devices―may be affected. On their own, these technical CIs provide little insight into business risk. Application Service Mapping connects these CIs to Application Services and Business Services as defined by the Common Service Data Model (CSDM). This relationship allows Change Managers to see which business services, customers, and processes are impacted by the planned change.
+
+By leveraging service maps, Change Management can answer critical questions such as:
+
+Which customer-facing services may experience downtime?
+
+What revenue-generating or mission-critical services are at risk?
+
+Which stakeholders must be notified or involved in approvals?
+
+Option A is incorrect because service mapping does not determine shutdown order; that is handled by infrastructure planning.
+
+Option C focuses on physical location data, which is typically managed through Location CIs and Discovery, not service mapping.
+
+Therefore, the correct answer is B C To understand the business impact of CIs, which aligns directly with ITIL 4, CSDM, and Change Management best practices.
+
+3. Configuration Management requires an accurate inventory of devices to be reflected in the CMDB.
+
+Which are common use cases for using Agent Client Collector (ACC)? (Choose 2 options)
+Servers in the data centercorrect
+Network devices in the DMZ
+Devices in secure environmentscorrect
+Devices that intermittently connect to the networkcorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+The Agent Client Collector (ACC) in ServiceNow is designed to collect inventory data from endpoints that are not consistently reachable by traditional Discovery methods. ACC is especially valuable where credential-based, network-based discovery is impractical or impossible.
+
+Devices in secure environments (Option C), such as isolated networks, restricted zones, or highly regulated environments, often block inbound discovery traffic. ACC runs locally on the device and securely sends inventory data outward, making it ideal for these scenarios.
+
+Devices that intermittently connect to the network (Option D), such as laptops, remote endpoints, or roaming devices, are another core use case. Traditional Discovery requires the device to be reachable during scheduled scans, which is unreliable for mobile or off-network assets. ACC ensures inventory data is collected whenever the device is online.
+
+Option A (data center servers) is better served by agentless Discovery, which provides deeper infrastructure and relationship data.
+
+Option B (network devices in the DMZ) are typically discovered using SNMP and network discovery, not ACC.
+
+ACC complements Discovery as part of a layered ingestion strategy, ensuring accurate inventory coverage across diverse environments.
+
+Therefore, the correct answers are C C Devices in secure environments and D C Devices that intermittently connect to the network.
+
+4. The CMDB Administrator group aims to display meaningful results on the CMDB Health Dashboard C Compliance Scorecard for server records that are not on the latest patch.
+
+What must be configured to achieve this goal?
+Certification Filter, Certification Template, Audit
+Technical Service Offerings, Dynamic CI Groups, CMDB Groupswrong
+Stale, Orphan, Duplicate
+Certification Policies, Data Filters, Scheduled Jobscorrect
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, the Compliance dimension of the CMDB Health Dashboard is driven by Data Certification. To surface meaningful compliance results―such as identifying servers that are not on the latest patch―the platform requires a combination of Certification Policies, Data Filters, and Scheduled Jobs.
+
+Certification Policies define what data must be validated and which attributes are subject to compliance checks (for example, patch level, OS version, or last update date). Data Filters scope the population―such as server classes only―ensuring the compliance evaluation targets the correct CIs. Scheduled Jobs automate when certifications run, keeping compliance scores current and reflective of the latest state.
+
+Options A and C are incorrect because audits and stale/orphan/duplicate checks relate to other health dimensions (correctness and completeness), not compliance.
+
+Option B focuses on service modeling and group alignment, which does not directly drive compliance scoring for patch currency.
+
+Therefore, configuring Certification Policies, Data Filters, and Scheduled Jobs is required to accurately measure and display patch compliance on the CMDB Health Dashboard.
+
+5. A CMDB Administrator has installed a Service Graph Connector and customized a script transform.
+
+What will happen on subsequent upgrades if the default definition of the script transform is
+
+updated?
+The upgrade stops and reports an errorwrong
+A skipped change is created and no change is made to the script transform definitioncorrect
+The Service Graph Connector upgrade refuses to start
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, Service Graph Connectors deliver data ingestion patterns using protected, upgrade-safe artifacts, including script transforms. When a customer customizes a script transform provided by a Service Graph Connector, ServiceNow follows standard update set and upgrade behavior to protect customer customizations.
+
+During a subsequent upgrade, if the out-of-box (default) script transform definition changes, ServiceNow does not overwrite the customized version. Instead, the platform records a skipped change, indicating that an update was available but intentionally not applied due to a local customization. This ensures customer-specific logic is preserved while still maintaining transparency about what changed in the newer release.
+
+Option A is incorrect because upgrades do not halt due to customized transforms.
+
+Option C is also incorrect because Service Graph Connector upgrades proceed normally; they do not refuse to start because of customizations.
+
+This behavior aligns with Data Foundations best practices: avoid modifying OOTB content when possible, but when customization is necessary, ensure it is protected during upgrades. Administrators should review skipped changes after upgrades to decide whether to manually adopt new OOTB logic.
+
+Therefore, the correct answer is B C A skipped change is created and no change is made to the script transform definition.
+
+6. A customer’s CMDB is aligned to the CSDM Walk stage.
+
+What benefit is provided by the CMDB?
+Allows for additional stratification of technical teams’ support structure along the lines of OLAs and commitments
+Improves the implementation velocity of APM Foundation for future business application rationalizationwrong
+Enables impact assessments for incident, problem, and change on Business Servicescorrect
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In the CSDM Walk stage, an organization has moved beyond basic data hygiene (Crawl) and has established foundational service models, especially Business Services and their relationships to underlying technical components. One of the most important and immediate benefits of reaching this stage is the ability to perform reliable impact analysis across ITSM processes.
+
+When Business Services are correctly defined and related to Application Services, applications, and infrastructure CIs, the CMDB becomes a decision-support system rather than just a data repository. This enables impact assessments for Incident, Problem, and Change Management, which is exactly what Option C describes. For example, when an incident is logged against a CI, ServiceNow can automatically determine which Business Services are impacted and who the affected stakeholders are. Similarly, during Change Management, planners can assess downstream risk by identifying which business-facing services could be disrupted.
+
+Option A is more aligned with advanced operational governance and support model optimization, which typically appears later as organizations mature toward the Run stage.
+
+Option B relates to Application Portfolio Management (APM) acceleration, which benefits more from accurate
+
+application ownership and lifecycle data rather than core Walk-stage service modeling.
+
+Therefore, the correct and CSDM-aligned benefit at the Walk stage is enabling impact assessments for incident, problem, and change on Business Services, making Option C the verified answer.
+
+7. The Configuration Manager is preparing justification to utilize the CMDB Data Foundations Dashboard.
+
+Which benefits align with the usage of this dashboard? (Choose 2 options)
+It automates approval processes for Change Managementcorrect
+It provides actionable insights to improve data quality and completenesscorrect
+It helps detect and eliminate duplicate records in the CMDB
+It enables monitoring and tracking of CMDB health over timecorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+The CMDB Data Foundations Dashboard is designed to provide visibility, insight, and guidance into the overall health of CMDB data. Its purpose is not to automate ITSM workflows, but to enable informed decision-making and continuous improvement of configuration data.
+
+One of its primary benefits is providing actionable insights to improve data quality and completeness (Option B). The dashboard highlights gaps in CI attributes, missing relationships, and compliance issues, enabling CMDB administrators and data owners to take targeted corrective actions using Get Well Playbooks.
+
+Another core benefit is enabling organizations to monitor and track CMDB health over time (Option D). The dashboard presents trends across health dimensions―completeness, correctness, and compliance―allowing teams to measure progress, justify investments, and demonstrate maturity improvements aligned to CSDM adoption stages.
+
+Option A is incorrect because Change Management approvals are handled by workflow and policy engines, not the Data Foundations Dashboard.
+
+Option C is also incorrect because duplicate detection and remediation are handled through de-duplication tools and the Duplicate CI Remediator, not directly by the dashboard itself.
+
+Therefore, the correct answers are B and D, which accurately reflect the strategic and operational value of the CMDB Data Foundations Dashboard.
+
+8. The CMDB Configuration Management team has successfully developed a healthy and trusted CMDB. They have integrated discovered infrastructure data, accurately referenced non-discoverable data (such as change and support group information), and made the CMDB service-aware using Service Mapping.
+
+Which field on an Incident form is automatically populated after a CI is selected that references an appropriate support group?
+Managed by Group
+Approval Group
+Assignment Groupcorrect
+Change Group
+Support Group
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In a mature CMDB implementation within ServiceNow, CI operational attributes are leveraged to automate ITSM workflows. One of the most important outcomes of accurate Configuration Management is automatic incident routing.
+
+When a CI is selected on an Incident record, ServiceNow evaluates the CI’s Support Group attribute. If populated correctly, the platform automatically copies this value into the Assignment Group field on the Incident. This ensures incidents are routed to the correct resolver group without manual triage, reducing mean time to resolution (MTTR).
+
+The Support Group is a CI attribute, not an incident field that drives workflow directly. The Assignment Group is the operational field used by Incident Management to assign ownership. Managed by Group, Approval Group, and Change Group are used in other governance and lifecycle contexts and are not auto-populated during incident creation.
+
+This behavior is a direct result of Data Foundations best practices: maintaining accurate CI-to-support-group relationships to enable automation and consistency across ITSM processes.
+
+Therefore, the correct answer is C C Assignment Group.
+
+9. Configuration Management needs to ensure data quality for all CIs in the CMDB.
+
+What areas of data quality for CIs are included in the CMDB Health Dashboard? (Choose 2 options)
+Downgraded CIscorrect
+Upgraded CIswrong
+Missing CIs
+Stale CIscorrect
+Duplicate CIscorrect
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+The CMDB Health Dashboard is a central component of CMDB Data Foundations insight and governance. It measures and tracks data quality using well-defined health indicators that focus on the accuracy, relevance, and usability of CI data.
+
+Two key data quality areas included in the dashboard are Stale CIs and Duplicate CIs.
+
+Stale CIs (Option D) refer to configuration items that have not been updated within a defined time window. These records are risky because they may no longer reflect the current state of the environment, leading to inaccurate impact analysis, poor change decisions, and misrouted incidents. Monitoring staleness helps organizations identify where discovery, integrations, or ownership processes are failing.
+
+Duplicate CIs (Option E) occur when the same real-world asset or service is represented by multiple records. Duplicates undermine trust in the CMDB, distort reporting, and break service mappings. The CMDB Health Dashboard highlights duplicate trends and integrates with de-duplication and remediation workflows to address them.
+
+Options A (Downgraded CIs), B (Upgraded CIs), and C (Missing CIs) are not standard CMDB Health Dashboard quality dimensions. While “missing” data may be inferred through completeness checks, Missing CIs as a category is not directly tracked.
+
+Therefore, the correct answers are D C Stale CIs and E C Duplicate CIs, which are core CMDB Health indicators used to maintain high-quality configuration data.
+
+10. A CMDB Manager wants to improve data quality using the CMDB Health Dashboard.
+
+What needs to happen to generate CMDB health scores?
+The scheduled jobs for the CMDB Health Dashboard must be activatedcorrect
+Nothing, CMDB health scores are calculated by defaultwrong
+The plugin, CMDB health calculation, needs to be installed
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, the CMDB Health Dashboard does not calculate health scores in real time by default. Instead, health scores are generated and refreshed by scheduled calculation jobs that evaluate CI data against defined health rules across the dimensions of completeness, correctness, and compliance.
+
+To generate and maintain CMDB health scores, the scheduled jobs for CMDB Health must be active. These jobs periodically scan the CMDB, apply health rules (for example, required attributes populated, lifecycle status compliance, certification results), and calculate scores that are displayed on the dashboard and scorecards. Without these scheduled jobs running, the dashboard cannot produce current or meaningful health metrics.
+
+Option B is incorrect because CMDB health scoring is not automatic or real-time; it depends on scheduled processing.
+
+Option C is also incorrect because CMDB Health is part of the core CMDB/Data Foundations capability in ServiceNow and does not require a separate “CMDB health calculation” plugin to be installed in modern implementations.
+
+Activating and maintaining these scheduled jobs ensures that health scores remain accurate, trend able over time, and useful for governance decisions. This is a foundational requirement for using the CMDB Health Dashboard as a data quality improvement tool.
+
+Therefore, the correct answer is A C The scheduled jobs for the CMDB Health Dashboard must be activated.
+
+11. A Configuration Manager needs to leverage a policy type to automate the creation and assignment of tasks to validate the existence of CIs.
+
+Which policy type should be used to accomplish this goal?
+Certification
+Delete
+Retire
+Attestationcorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, validating whether Configuration Items (CIs) still exist is a core CMDB governance activity. Over time, environments change rapidly―servers are decommissioned, cloud resources are torn down, and applications are replaced. If existence validation is not enforced, the CMDB quickly fills with obsolete or “ghost” CIs.
+
+Attestation policies are specifically designed to address this need. An attestation policy automatically generates and assigns tasks to responsible users or groups, asking them to confirm that a CI still exists and is still relevant. This process focuses on acknowledgment rather than deep data validation, making it lightweight and scalable across large CMDBs.
+
+Certification policies (Option A) are used when specific attributes must be validated, such as lifecycle status, support group, or environment. While important for data correctness, certification is not intended solely to confirm CI existence. Delete (Option B) and Retire (Option C) policies are lifecycle actions that remove or transition records, but they do not validate existence before taking action.
+
+Attestation integrates cleanly with CMDB Workspace, assigns tasks automatically, and supports auditability―ensuring accountability for CI ownership. This makes it the correct and Data FoundationsCaligned policy type for validating CI existence.
+
+Therefore, Option D C Attestation is the correct answer.
+
+12. In a company, there is a need to understand the CSDM maturity level required. Different stakeholders listed several use cases they expect over time.
+
+Which use case requires information objects?
+The Asset Management team wants to understand asset lifecycle compliance in a Business
+Application contextcorrect
+The Event Operations team wants to automate their events into incidents for operational actions
+The Customer Service team wants to onboard proactive case management
+The SecOps team wants to understand the operational risk in the Business Application context
+The Business Service Management team wants to understand the operational impact for their consumer parties
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+Within the Common Service Data Model (CSDM), information objects are used to represent non-CI data entities that provide important business or governance context but are not configuration items themselves. These objects are especially important when extending service visibility beyond pure infrastructure and application relationships.
+
+The use case described in Option A―understanding asset lifecycle compliance in a Business Application context―explicitly requires information objects. Asset lifecycle data (such as financial state, depreciation, warranty, and compliance milestones) is typically managed in IT Asset Management (ITAM) and must be associated to Business Applications without converting every asset-related data point into a CI. Information objects enable this linkage while maintaining clean CMDB boundaries.
+
+Option B focuses on event-to-incident automation, which relies on CIs, technical services, and operational relationships, not information objects.
+
+Option C (proactive case management) is primarily a CSM and service offering use case.
+
+Option D (SecOps risk context) relies on application services and business application relationships, not information objects.
+
+Option E (business service impact) is addressed through service modeling and service mapping, again without requiring information objects.
+
+Information objects are introduced as organizations mature and need to integrate governance, financial, or compliance data with service and application models―making asset lifecycle compliance the correct match.
+
+Therefore, the correct answer is A.
+
+13. What is the difference between Data Certification and Attestation policies when managing a CI?
+Attestation requires correcting specific attributes of a CI, while Data Certification tracks
+acknowledgement the CI still exists
+Attestation can be scheduled, while Data Certification cannot be scheduled
+Attestation can be assigned to a group or an individual, while Data Certification can only be assigned to an individual
+Attestation tracks acknowledgement the CI still exists, while Data Certification requires validating specific attributes of a CIcorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+Within ServiceNow CMDB governance, Attestation and Data Certification serve distinct but complementary purposes. The key difference lies in what is being validated.
+
+Attestation is focused on existence and ownership confirmation. When a CI is attested, the assigned user or group is asked to confirm that the CI still exists, is still relevant, and is still owned or managed by the appropriate team. No detailed attribute-level validation is required. This lightweight process is commonly used to prevent “ghost CIs” from lingering in the CMDB.
+
+Data Certification, on the other hand, is more rigorous. It requires the certifier to validate specific attributes of the CI, such as lifecycle status, support group, environment, or service relationships. Certification ensures data correctness and completeness, which directly impacts CMDB Health scores and downstream processes like Change and Incident Management.
+
+Options A, B, and C incorrectly describe these mechanisms or their assignment and scheduling capabilities. Both attestation and certification can be scheduled and assigned flexibly, but their validation depth is what truly differentiates them.
+
+Therefore, Option D correctly describes the distinction: attestation confirms existence, while data certification validates CI attributes.
+
+14. CMDB class owners are receiving tasks under the “My Work” tab in the CMDB Workspace.
+
+Which CMDB management tool is generating those tasks?
+De-duplication templates
+CMDB Data Managercorrect
+CMDB Health Dashboard
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+The CMDB Data Manager is the ServiceNow capability responsible for generating actionable governance tasks and assigning them to CI class owners and data stewards. These tasks appear directly in the “My Work” tab within the CMDB Workspace, enabling proactive and role-based CMDB governance.
+
+CMDB Data Manager focuses on data lifecycle management, including archival, retirement, and cleanup of CIs based on defined policies. When lifecycle rules or retention thresholds are met―or when human validation is required―the Data Manager creates tasks to prompt responsible owners to take action. This ensures that CMDB data remains accurate, compliant, and lean over time.
+
+The CMDB Health Dashboard (Option C) provides visibility into health metrics such as completeness, correctness, and compliance, but it does not generate tasks. Similarly, De-duplication templates (Option A) support duplicate identification and remediation workflows, but they do not create ongoing governance tasks in the CMDB Workspace.
+
+By surfacing tasks in “My Work,” CMDB Data Manager operationalizes governance and embeds accountability into daily workflows, which is a key principle of CMDB Data Foundations.
+
+Therefore, the correct answer is Option B C CMDB Data Manager.
+
+15. A CMDB Administrator needs to import external data into the CMDB. To reduce the risk of creating duplicates and prevent updates from unauthorized sources, it must be ensured that the Identification and Reconciliation Engine (IRE) is not bypassed.
+
+What is the recommended method to import data into the CMDB utilizing the Identification and Reconciliation API?
+IntegrationHub ETLcorrect
+Table API (REST API or SOAP API)
+Import Sets and Transform Maps
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, protecting CMDB data quality during ingestion is a core Data Foundations principle. The Identification and Reconciliation Engine (IRE) is designed to ensure that CI records are uniquely identified, merged correctly, and protected from unauthorized overwrites. Any ingestion method that bypasses IRE introduces a high risk of duplicates and data corruption.
+
+IntegrationHub ETL is the recommended method because it is natively designed to work with the Identification and Reconciliation API. When properly configured, IntegrationHub ETL ensures that incoming data is processed through IRE, applying identification rules, reconciliation rules, and source precedence. This allows multiple data sources to coexist safely while maintaining CMDB integrity.
+
+Option B (Table API) is explicitly discouraged for CMDB ingestion because it writes directly to CMDB tables and bypasses IRE entirely, making it one of the most common causes of duplicate and conflicting CI records. While REST and SOAP APIs are powerful, they are not safe for CMDB ingestion unless they explicitly invoke the IRE API, which most generic table integrations do not.
+
+Option C (Import Sets and Transform Maps) can be configured to call IRE, but this requires additional scripting and strict governance. Because of this complexity and higher risk of misconfiguration, it is not the recommended approach when safer, purpose-built options exist.
+
+Therefore, IntegrationHub ETL is the verified and best-practice answer, making Option A correct.
+
+16. A CMDB Administrator has built a number of Technology Management Service Offerings (Technical Service Offerings) based on Dynamic CI Groups to better maintain group alignment for the member CIs.
+
+Which groups are synced to CIs from the offering that has a relationship to a Dynamic CI Group? (Choose 2 options)
+Approval Groupcorrect
+Managed by Groupcorrect
+Owned by Group
+Support Groupcorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, Dynamic CI Groups are a core Data Foundations capability used to automatically manage CI membership based on rules rather than manual maintenance. When Technology Management Service Offerings (Technical Service Offerings) are related to Dynamic CI Groups, ServiceNow uses those relationships to synchronize operational support attributes to the member CIs.
+
+The two CI attributes that are intentionally designed to sync in this model are the Managed by Group and the Support Group. These groups directly influence operational ownership and support routing, which is why they are automatically aligned when Dynamic CI Groups are used. This ensures that incidents, changes, problems, and operational tasks are routed consistently as CI membership changes over time.
+
+The Support Group defines who provides day-to-day operational support and is critical for Incident and Request Management workflows. The Managed by Group represents the team responsible for the technical lifecycle and operational health of the CI. Synchronizing these attributes eliminates manual updates and reduces misrouted tickets, which is a key goal of Configuration Management maturity.
+
+The Approval Group (Option A) is not synced because approvals are process-driven and often context-specific rather than CI-driven. Similarly, the Owned by Group (Option C) represents accountability or financial ownership, which is intentionally decoupled from dynamic operational
+
+grouping to avoid unintended governance changes.
+
+Therefore, the correct answers are B (Managed by Group) and D (Support Group).
+
+17. Which is a purpose or requirement of CMDB Data Manager in ServiceNow?
+Encrypts archived records for enhanced security
+Automates the enforcement of relationship rules between CIs in the CMDB
+Automates the archival and deletion of records based on retention policiescorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+The CMDB Data Manager capability in ServiceNow is designed to support CMDB governance, specifically around data lifecycle management. Its primary purpose is to ensure that CI records are retained, archived, and deleted in accordance with defined retention policies, regulatory requirements, and organizational data governance standards.
+
+As CMDBs mature, they naturally accumulate obsolete, retired, or decommissioned CIs. If these records are not properly managed, they negatively impact CMDB health, reporting accuracy, discovery reconciliation, and performance. CMDB Data Manager addresses this by automating the archival and deletion of records once lifecycle conditions and retention thresholds are met.
+
+Option A is incorrect because encryption of archived records is handled by platform-level security and data protection features, not CMDB Data Manager.
+
+Option B is also incorrect because relationship rule enforcement is managed through CSDM guidance, CMDB relationship rules, and identification/reconciliation logic―not by CMDB Data Manager.
+
+By automating retention-based archival and cleanup, CMDB Data Manager helps organizations maintain a lean, compliant, and high-quality CMDB, which directly supports CMDB Health metrics such as correctness and compliance.
+
+Therefore, the correct and verified answer is Option C.
+
+18. A CMDB Administrator needs to identify which attributes have been created specifically for the Windows Server class.
+
+Which tab in the Attributes section is used?
+Child
+Addedcorrect
+All
+Derived
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+Within the CMDB class dictionary in ServiceNow, attributes can be inherited from parent classes or defined directly on a specific class. To identify attributes created specifically for the Windows Server class, administrators must use the Added tab.
+
+The Added tab displays attributes that are unique to the selected class and not inherited from parent classes (such as Server or Computer). This is essential for understanding class-specific extensions―
+
+like Windows-only configuration details―that were introduced to support platform requirements, discovery enhancements, or organizational needs.
+
+The All tab shows every attribute available to the class, including inherited and added attributes, which makes it difficult to isolate class-specific additions. The Child tab focuses on attributes inherited by subclasses, not attributes introduced at the current class level. The Derived tab shows attributes calculated or derived from other data, not necessarily those created specifically for the class.
+
+Using the Added tab supports best practices for configuration transparency, impact analysis during upgrades, and governance―especially important in Data Foundations to minimize unnecessary customization and maintain upgrade-safe designs.
+
+Therefore, the correct answer is B C Added.
+
+19. A CMDB Administrator identifies duplicate CIs. One was created by a manual import, and the other was created by automated discovery. The discovered CI has the latest IP address, while the manually
+
+imported CI has an accurate relationship to a critical business application.
+
+How does the Administrator use the Duplicate CI Remediator to resolve this issue?
+Merge the two CIs automatically, retaining all attributes from the discovered CI
+Retain the manually imported CI and delete the discovered CI
+Retain the discovered CI, but merge the relationship from the manually imported CIcorrect
+Retain the discovered CI and delete the manually imported CI
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+In ServiceNow, the Duplicate CI Remediator is designed to resolve duplicate records while preserving the most authoritative data from each source. Data Foundations guidance clearly states that automated discovery is the system of record for technical attributes, such as IP address, hostname, and operational status, while manually maintained records often contain valuable business context, such as relationships to business applications or services.
+
+In this scenario, the discovered CI contains the most accurate and up-to-date technical data, making it the correct CI to retain as the primary record. However, the manually imported CI has a critical relationship to a business application, which is essential for impact analysis, incident prioritization, and CSDM alignment. Deleting this CI without preserving the relationship would result in loss of business context and reduced CMDB value.
+
+The Duplicate CI Remediator supports selective merging, allowing administrators to retain one CI while merging specific attributes or relationships from the duplicate.
+
+Option C reflects this best practice by retaining the discovered CI and merging the relationship from the manually imported CI, ensuring both technical accuracy and business relevance are preserved.
+
+Options A and D would result in the loss of important relationship data, while Option B would discard the discovered CI, violating the principle that discovery should be the authoritative source for technical attributes.
+
+Therefore, Option C is the correct and Data FoundationsCaligned answer.
+
+20. What ensures data volume in the CMDB is manageable?
+Business Rules
+Scheduled Jobs
+Archive Policiescorrect
+Question was not answered
+Explanation:
+Comprehensive and Detailed Explanation (200C300 words):
+
+Managing CMDB data volume is a key Data Foundations governance objective. Over time, CMDBs naturally accumulate retired, obsolete, or decommissioned CIs. If these records are not properly managed, they degrade CMDB performance, reduce reporting accuracy, and negatively impact discovery reconciliation and health scores.
+
+Archive Policies are the mechanism designed to address this challenge. They define when CI records should be archived or deleted based on lifecycle state, age, or retention requirements. By automating archival and cleanup, archive policies ensure that only relevant, active CIs remain in the operational CMDB, keeping data volume manageable and performant.
+
+Business Rules (Option A) are used to enforce logic during record creation or updates, not for long-term data volume control. Scheduled Jobs (Option B) may execute tasks, but without archive policies they have no governance logic to determine what should be removed or retained.
+
+Archive policies work in conjunction with CMDB Data Manager to enforce lifecycle-based retention and cleanup, making them the correct and verified answer.
+
+Therefore, Option C C Archive Policies is correct.
