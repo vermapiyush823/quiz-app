@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview"
   },
+  "packageManager": "pnpm@11.17.0",
   "engines": {
     "node": ">=20.0.0"
   },
