@@ -2,20 +2,36 @@ import { createContext, useContext, useReducer, useCallback, useRef, useEffect }
 import { shuffle, buildQuizSets } from '../utils/constants';
 
 // ─── State Shape ──────────────────────────────────────────────
+const getInitialTheme = () => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('quiz_theme');
+    if (saved) return saved;
+  }
+  return 'dark';
+};
+
 const initialState = {
-  page: 'home',          // 'home' | 'quiz' | 'results'
+  theme: getInitialTheme(),
+  page: 'home',          // 'home' | 'quiz' | 'results' | 'quick-learning'
+  mode: 'practice',      // 'practice' (instant answers) | 'exam' (real test, answers at end)
   allQuestions: [],
   quizSets: [],
   loading: true,
   error: null,
 
+  // Selected quiz setup
+  selectedQuizId: null,
+  showModeModal: false,
+
   // Active quiz
   activeQuiz: null,
   currentIndex: 0,
   answers: [],           // null | { selectedIndices: number[], isCorrect: boolean, timeSpent: number }
-  pendingSelections: [], // number[] for currently toggled checkboxes before submit
-  revealed: false,
-  timeLeft: 45,
+  pendingSelections: [], // number[]
+  flags: [],             // boolean[] tracking 'Marked for Review' in exam mode
+  revealed: false,       // true only in practice mode after answering
+  timeLeft: 60,          // per-question timer for practice mode
+  examTimeLeft: 5400,    // overall seconds for real exam mode
   quizStartTime: null,
 };
 
@@ -39,51 +55,114 @@ function quizReducer(state, action) {
     case 'LOAD_ERROR':
       return { ...state, loading: false, error: action.error };
 
-    case 'START_QUIZ':
+    case 'OPEN_MODE_MODAL':
+      return {
+        ...state,
+        selectedQuizId: action.quizId,
+        showModeModal: true,
+      };
+
+    case 'CLOSE_MODE_MODAL':
+      return {
+        ...state,
+        showModeModal: false,
+      };
+
+    case 'START_QUIZ': {
+      const mode = action.mode || 'practice';
+      const quiz = action.quiz;
+      const qCount = quiz.questions.length;
+      const totalExamSeconds = (quiz.totalTimeMins || 90) * 60;
+
       return {
         ...state,
         page: 'quiz',
-        activeQuiz: action.quiz,
+        mode,
+        activeQuiz: quiz,
         currentIndex: 0,
-        answers: new Array(action.quiz.questions.length).fill(null),
+        answers: new Array(qCount).fill(null),
         pendingSelections: [],
+        flags: new Array(qCount).fill(false),
         revealed: false,
-        timeLeft: action.quiz.timePerQ,
+        timeLeft: quiz.timePerQ || 60,
+        examTimeLeft: totalExamSeconds,
         quizStartTime: Date.now(),
+        showModeModal: false,
       };
+    }
 
     case 'TOGGLE_OPTION': {
-      if (state.revealed) return state;
       const q = state.activeQuiz.questions[state.currentIndex];
       const isMulti = q.multiSelect || (q.correctIndices && q.correctIndices.length > 1);
+      const targetIndices = q.correctIndices || [q.correctIndex ?? 0];
 
-      if (!isMulti) {
-        // Single choice: immediately submit
-        const targetIndices = q.correctIndices || [q.correctIndex ?? 0];
-        const isCorrect = arraysEqual([action.index], targetIndices);
-        const timeSpent = state.activeQuiz.timePerQ - state.timeLeft;
+      if (state.mode === 'practice') {
+        if (state.revealed) return state;
 
-        const newAnswers = [...state.answers];
-        newAnswers[state.currentIndex] = {
-          selectedIndices: [action.index],
-          isCorrect,
-          timeSpent,
-        };
+        if (!isMulti) {
+          // Single choice in practice mode: immediate submit
+          const isCorrect = arraysEqual([action.index], targetIndices);
+          const timeSpent = (state.activeQuiz.timePerQ || 60) - state.timeLeft;
 
-        return {
-          ...state,
-          pendingSelections: [action.index],
-          revealed: true,
-          answers: newAnswers,
-        };
+          const newAnswers = [...state.answers];
+          newAnswers[state.currentIndex] = {
+            selectedIndices: [action.index],
+            isCorrect,
+            timeSpent: Math.max(timeSpent, 1),
+          };
+
+          return {
+            ...state,
+            pendingSelections: [action.index],
+            revealed: true,
+            answers: newAnswers,
+          };
+        } else {
+          // Multi-select toggle before submit
+          const exists = state.pendingSelections.includes(action.index);
+          const updated = exists
+            ? state.pendingSelections.filter(i => i !== action.index)
+            : [...state.pendingSelections, action.index];
+
+          return { ...state, pendingSelections: updated };
+        }
       } else {
-        // Multi-select toggle
-        const exists = state.pendingSelections.includes(action.index);
-        const updated = exists
-          ? state.pendingSelections.filter(i => i !== action.index)
-          : [...state.pendingSelections, action.index];
+        // EXAM MODE: Selection without immediate reveal
+        if (!isMulti) {
+          // Single choice in exam mode
+          const isCorrect = arraysEqual([action.index], targetIndices);
+          const newAnswers = [...state.answers];
+          newAnswers[state.currentIndex] = {
+            selectedIndices: [action.index],
+            isCorrect,
+            timeSpent: 0,
+          };
+          return {
+            ...state,
+            pendingSelections: [action.index],
+            answers: newAnswers,
+          };
+        } else {
+          // Multi-select in exam mode
+          const exists = state.pendingSelections.includes(action.index);
+          const updated = exists
+            ? state.pendingSelections.filter(i => i !== action.index)
+            : [...state.pendingSelections, action.index];
 
-        return { ...state, pendingSelections: updated };
+          const isCorrect = arraysEqual(updated, targetIndices);
+          const newAnswers = [...state.answers];
+          newAnswers[state.currentIndex] = updated.length > 0 ? {
+            selectedIndices: updated,
+            isCorrect,
+            timeSpent: 0,
+          } : null;
+
+          return {
+            ...state,
+            pendingSelections: updated,
+            answers: newAnswers,
+          };
+        }
       }
     }
 
@@ -92,13 +171,13 @@ function quizReducer(state, action) {
       const q = state.activeQuiz.questions[state.currentIndex];
       const targetIndices = q.correctIndices || [q.correctIndex ?? 0];
       const isCorrect = arraysEqual(state.pendingSelections, targetIndices);
-      const timeSpent = state.activeQuiz.timePerQ - state.timeLeft;
+      const timeSpent = (state.activeQuiz.timePerQ || 60) - state.timeLeft;
 
       const newAnswers = [...state.answers];
       newAnswers[state.currentIndex] = {
         selectedIndices: [...state.pendingSelections],
         isCorrect,
-        timeSpent,
+        timeSpent: Math.max(timeSpent, 1),
       };
 
       return {
@@ -106,6 +185,12 @@ function quizReducer(state, action) {
         revealed: true,
         answers: newAnswers,
       };
+    }
+
+    case 'TOGGLE_FLAG': {
+      const newFlags = [...state.flags];
+      newFlags[state.currentIndex] = !newFlags[state.currentIndex];
+      return { ...state, flags: newFlags };
     }
 
     case 'NEXT_QUESTION': {
@@ -116,8 +201,8 @@ function quizReducer(state, action) {
           ...state,
           currentIndex: nextIdx,
           pendingSelections: nextAns ? nextAns.selectedIndices : [],
-          revealed: nextAns !== null,
-          timeLeft: state.activeQuiz.timePerQ,
+          revealed: state.mode === 'practice' ? nextAns !== null : false,
+          timeLeft: state.activeQuiz.timePerQ || 60,
         };
       }
       return state;
@@ -131,8 +216,8 @@ function quizReducer(state, action) {
           ...state,
           currentIndex: prevIdx,
           pendingSelections: prevAns ? prevAns.selectedIndices : [],
-          revealed: prevAns !== null,
-          timeLeft: state.activeQuiz.timePerQ,
+          revealed: state.mode === 'practice' ? prevAns !== null : false,
+          timeLeft: state.activeQuiz.timePerQ || 60,
         };
       }
       return state;
@@ -144,29 +229,47 @@ function quizReducer(state, action) {
         ...state,
         currentIndex: action.index,
         pendingSelections: targetAns ? targetAns.selectedIndices : [],
-        revealed: targetAns !== null,
-        timeLeft: state.activeQuiz.timePerQ,
+        revealed: state.mode === 'practice' ? targetAns !== null : false,
+        timeLeft: state.activeQuiz.timePerQ || 60,
       };
     }
 
-    case 'TICK_TIMER':
-      if (state.timeLeft <= 1) {
-        // Time up
-        if (!state.revealed) {
-          const q = state.activeQuiz.questions[state.currentIndex];
-          const targetIndices = q.correctIndices || [q.correctIndex ?? 0];
-          const isCorrect = arraysEqual(state.pendingSelections, targetIndices) && state.pendingSelections.length > 0;
-          const newAnswers = [...state.answers];
-          newAnswers[state.currentIndex] = {
-            selectedIndices: [...state.pendingSelections],
-            isCorrect,
-            timeSpent: state.activeQuiz.timePerQ,
-          };
-          return { ...state, timeLeft: 0, revealed: true, answers: newAnswers };
+    case 'TICK_TIMER': {
+      if (state.mode === 'practice') {
+        if (state.timeLeft <= 1) {
+          if (!state.revealed) {
+            const q = state.activeQuiz.questions[state.currentIndex];
+            const targetIndices = q.correctIndices || [q.correctIndex ?? 0];
+            const isCorrect = arraysEqual(state.pendingSelections, targetIndices) && state.pendingSelections.length > 0;
+            const newAnswers = [...state.answers];
+            newAnswers[state.currentIndex] = {
+              selectedIndices: [...state.pendingSelections],
+              isCorrect,
+              timeSpent: state.activeQuiz.timePerQ || 60,
+            };
+            return { ...state, timeLeft: 0, revealed: true, answers: newAnswers };
+          }
+          return { ...state, timeLeft: 0 };
         }
-        return { ...state, timeLeft: 0 };
+        return { ...state, timeLeft: state.timeLeft - 1 };
+      } else {
+        // Exam mode countdown
+        if (state.examTimeLeft <= 1) {
+          // Time's up in exam! Auto finish
+          return { ...state, examTimeLeft: 0, page: 'results' };
+        }
+        return { ...state, examTimeLeft: state.examTimeLeft - 1 };
       }
-      return { ...state, timeLeft: state.timeLeft - 1 };
+    }
+
+    case 'TOGGLE_THEME': {
+      const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('quiz_theme', nextTheme);
+        document.documentElement.setAttribute('data-theme', nextTheme);
+      }
+      return { ...state, theme: nextTheme };
+    }
 
     case 'FINISH_QUIZ':
       return { ...state, page: 'results' };
@@ -178,16 +281,20 @@ function quizReducer(state, action) {
       return { ...state, page: 'quick-learning' };
 
     case 'RESTART_QUIZ': {
-      const quiz = { ...state.activeQuiz, questions: state.activeQuiz.id === 'full' ? shuffle(state.allQuestions) : state.activeQuiz.questions };
+      const quiz = state.activeQuiz;
+      const qCount = quiz.questions.length;
+      const totalExamSeconds = (quiz.totalTimeMins || 90) * 60;
       return {
         ...state,
         page: 'quiz',
         activeQuiz: quiz,
         currentIndex: 0,
-        answers: new Array(quiz.questions.length).fill(null),
+        answers: new Array(qCount).fill(null),
         pendingSelections: [],
+        flags: new Array(qCount).fill(false),
         revealed: false,
-        timeLeft: quiz.timePerQ,
+        timeLeft: quiz.timePerQ || 60,
+        examTimeLeft: totalExamSeconds,
         quizStartTime: Date.now(),
       };
     }
@@ -215,15 +322,36 @@ export function QuizProvider({ children }) {
   // Timer management
   useEffect(() => {
     clearInterval(timerRef.current);
-    if (state.page === 'quiz' && !state.revealed) {
-      timerRef.current = setInterval(() => dispatch({ type: 'TICK_TIMER' }), 1000);
+    if (state.page === 'quiz') {
+      if (state.mode === 'practice' && !state.revealed) {
+        timerRef.current = setInterval(() => dispatch({ type: 'TICK_TIMER' }), 1000);
+      } else if (state.mode === 'exam') {
+        timerRef.current = setInterval(() => dispatch({ type: 'TICK_TIMER' }), 1000);
+      }
     }
     return () => clearInterval(timerRef.current);
-  }, [state.page, state.currentIndex, state.revealed]);
+  }, [state.page, state.currentIndex, state.revealed, state.mode]);
 
-  const startQuiz = useCallback((quizId) => {
+  // Initial theme sync on mount
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.theme);
+  }, [state.theme]);
+
+  const toggleTheme = useCallback(() => {
+    dispatch({ type: 'TOGGLE_THEME' });
+  }, []);
+
+  const openModeModal = useCallback((quizId) => {
+    dispatch({ type: 'OPEN_MODE_MODAL', quizId });
+  }, []);
+
+  const closeModeModal = useCallback(() => {
+    dispatch({ type: 'CLOSE_MODE_MODAL' });
+  }, []);
+
+  const startQuiz = useCallback((quizId, mode = 'practice') => {
     const quiz = state.quizSets.find(s => s.id === quizId);
-    if (quiz) dispatch({ type: 'START_QUIZ', quiz });
+    if (quiz) dispatch({ type: 'START_QUIZ', quiz, mode });
   }, [state.quizSets]);
 
   const toggleOption = useCallback((index) => {
@@ -232,6 +360,10 @@ export function QuizProvider({ children }) {
 
   const submitMultiAnswer = useCallback(() => {
     dispatch({ type: 'SUBMIT_MULTI_ANSWER' });
+  }, []);
+
+  const toggleFlag = useCallback(() => {
+    dispatch({ type: 'TOGGLE_FLAG' });
   }, []);
 
   const nextQuestion = useCallback(() => dispatch({ type: 'NEXT_QUESTION' }), []);
@@ -245,9 +377,13 @@ export function QuizProvider({ children }) {
   return (
     <QuizContext.Provider value={{
       state,
+      toggleTheme,
+      openModeModal,
+      closeModeModal,
       startQuiz,
       toggleOption,
       submitMultiAnswer,
+      toggleFlag,
       nextQuestion,
       prevQuestion,
       jumpToQuestion,

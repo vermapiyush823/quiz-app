@@ -2787,5 +2787,138 @@
     ],
     "explanation": "Archive Policies define lifecycle criteria to move obsolete CI records into archive tables, maintaining optimal CMDB performance and manageable data volume.",
     "id": 153
+  },
+  {
+    "source": "Web Research Q1",
+    "category": "CSDM & Lifecycle",
+    "difficulty": "medium",
+    "multiSelect": true,
+    "question": "A State field is updated on a Hardware Asset record. Which fields on the associated Configuration Item (CI) record are automatically synchronized through ServiceNow baseline asset-CI mapping? (Choose 2 options)",
+    "options": [
+      "Operational status",
+      "Install Status",
+      "Hardware Status",
+      "Asset tag"
+    ],
+    "correctIndices": [
+      1,
+      2
+    ],
+    "explanation": "In ServiceNow asset-to-CI synchronization, updates to an Asset's State field automatically map to and synchronize the CI's 'Install Status' and 'Hardware Status' attributes, ensuring operational status and asset inventory remain aligned.",
+    "id": 154
+  },
+  {
+    "source": "Web Research Q2",
+    "category": "CMDB Health & Dashboards",
+    "difficulty": "medium",
+    "multiSelect": true,
+    "question": "To operationalize and maintain long-term health of the CMDB, ServiceNow prescribes which core pillars to successful Data Foundations? (Choose 3 options)",
+    "options": [
+      "Design",
+      "Ingest",
+      "Customization",
+      "Govern",
+      "Insight"
+    ],
+    "correctIndices": [
+      0,
+      1,
+      3
+    ],
+    "explanation": "ServiceNow defines the four core pillars of CMDB Data Foundations as: (1) Design (CSDM alignment and CI class hierarchies), (2) Ingest (IRE, Discovery, and Service Graph Connectors), (3) Govern (Data Manager policies, Attestation, and Archival), and (4) Insight (Health Dashboards and 360 queries).",
+    "id": 155
+  },
+  {
+    "source": "Web Research Q3",
+    "category": "CSDM & Lifecycle",
+    "difficulty": "hard",
+    "multiSelect": false,
+    "question": "A CMDB Owner reviewing CSDM conformance finds services correctly placed in their respective CSDM domains, but observes almost no relationship links between the layers. What does this gap indicate?",
+    "options": [
+      "The service records were created in the wrong CI classes",
+      "The domain definitions were applied too broadly during mapping",
+      "The classification was completed without the relational modeling that gives it operational meaning",
+      "Discovery has not reached the infrastructure sitting beneath the mapped services"
+    ],
+    "correctIndices": [
+      2
+    ],
+    "explanation": "CSDM is not just a classification taxonomy; its value lies in interconnected service topology (e.g. Business Capability -> Business Application -> Application Service -> Infrastructure). Placing records in tables without relating them lacks operational value for Incident, Change, and Risk management.",
+    "id": 156
+  },
+  {
+    "source": "Web Research Q4",
+    "category": "IRE & Reconciliation",
+    "difficulty": "hard",
+    "multiSelect": false,
+    "question": "An integration developer wants to load inventory using a custom script that writes directly to cmdb_ci_server using Table REST API. Why is this strongly discouraged per Data Foundations best practices?",
+    "options": [
+      "Table API cannot insert records into child CMDB tables",
+      "Table API bypasses the Identification and Reconciliation Engine (IRE), risking massive duplicates and unmanaged overwrites",
+      "Table API disables user activity auditing on cmdb tables",
+      "Table API only supports XML payloads rather than JSON"
+    ],
+    "correctIndices": [
+      1
+    ],
+    "explanation": "Writing directly to CMDB tables via Table API bypasses IRE identification rules, reconciliation precedence, and multi-source logging, which frequently leads to duplicate CIs and data corruption from unauthorized sources.",
+    "id": 157
+  },
+  {
+    "source": "Web Research Q5",
+    "category": "CMDB Health & Dashboards",
+    "difficulty": "medium",
+    "multiSelect": false,
+    "question": "Under the CSDM Data Foundations Dashboard, which Get Well Playbook is specifically designed to eliminate legacy custom status choices and transition records to standard Life Cycle Stage / Status fields?",
+    "options": [
+      "Percentage of Custom Status Values for CI Life Cycle Stages",
+      "Legacy Operational Status Conversion Playbook",
+      "Custom Field Deprecation Playbook",
+      "Attestation Policy Playbook for Inactive CIs"
+    ],
+    "correctIndices": [
+      0
+    ],
+    "explanation": "The 'Percentage of Custom Status Values for CI Life Cycle Stages' playbook guides administrators through mapping legacy/custom status choices into standard ServiceNow Life Cycle Stage and Stage Status values across all CMDB classes.",
+    "id": 158
+  },
+  {
+    "source": "Web Research Q6",
+    "category": "CMDB Workspace & Query Builder",
+    "difficulty": "medium",
+    "multiSelect": false,
+    "question": "A Configuration Manager needs to find all Linux Server CIs that have reported conflicting CPU counts across ServiceNow Discovery and Microsoft SCCM. Which feature provides this cross-source comparison?",
+    "options": [
+      "CMDB 360 Attribute Value Comparison Query",
+      "CMDB Health Correctness Dashboard",
+      "Unified Map Topology Filter",
+      "Identification Rule Identifier Log"
+    ],
+    "correctIndices": [
+      0
+    ],
+    "explanation": "CMDB 360 (Multisource CMDB) includes the 'Compare Attribute Values' query capability, allowing administrators to compare raw values reported by different discovery sources (e.g. Discovery vs SCCM) for any CI attribute.",
+    "id": 159
+  },
+  {
+    "source": "Web Research Q7",
+    "category": "CSDM & Lifecycle",
+    "difficulty": "medium",
+    "multiSelect": true,
+    "question": "Which of the following are valid CSDM 5.0 Foundation domain core tables that store shared referential context across the platform? (Choose 3 options)",
+    "options": [
+      "cmn_location (Location)",
+      "sys_user_group (User Group)",
+      "cmdb_ci_service (Business Service)",
+      "core_company (Company)",
+      "cmdb_ci_appl (Application)"
+    ],
+    "correctIndices": [
+      0,
+      1,
+      3
+    ],
+    "explanation": "In CSDM 5.0, Foundation domain tables store core non-CI referential data shared platform-wide, including cmn_location, sys_user_group, sys_user, core_company, business_unit, and cmn_department.",
+    "id": 160
   }
 ]

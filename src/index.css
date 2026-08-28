@@ -1,11 +1,12 @@
 /* ============================================================
-   QUIZ APP — Global Styles (Udemy-inspired dark theme)
+   QUIZ APP — Global Styles with Dynamic Dark & Light Theme
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-/* ─── CSS Variables ─────────────────────────────────────────── */
-:root {
+/* ─── Default Dark Theme ─────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
   --primary: #a435f0;
   --primary-dark: #8710d8;
   --primary-light: #c56af5;
@@ -21,6 +22,7 @@
   --bg-base: #0d0d0d;
   --bg-card: #161616;
   --bg-elevated: #1c1c1c;
+  --bg-modal: #141416;
   --bg-glass: rgba(255, 255, 255, 0.04);
   --bg-glass-hover: rgba(255, 255, 255, 0.08);
 
@@ -31,14 +33,14 @@
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(164, 53, 240, 0.4);
 
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px var(--primary-glow);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-pill: 50px;
-
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 30px var(--primary-glow);
 
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-spring: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -48,10 +50,40 @@
   --nav-height: 68px;
 }
 
+/* ─── Clean Light Theme ──────────────────────────────────────── */
+[data-theme="light"] {
+  --primary: #902bd6;
+  --primary-dark: #6e1bb0;
+  --primary-light: #a435f0;
+  --primary-glow: rgba(144, 43, 214, 0.2);
+  --accent: #e67e22;
+  --accent-light: #f39c12;
+  --success: #16a34a;
+  --success-light: rgba(22, 163, 74, 0.12);
+  --error: #dc2626;
+  --error-light: rgba(220, 38, 38, 0.12);
+  --warning: #d97706;
+
+  --bg-base: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-modal: #ffffff;
+  --bg-glass: rgba(0, 0, 0, 0.03);
+  --bg-glass-hover: rgba(0, 0, 0, 0.06);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(144, 43, 214, 0.4);
+
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 30px rgba(144, 43, 214, 0.12);
+}
+
 /* ─── Reset ─────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -61,14 +93,11 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   scrollbar-width: none;
-  /* Firefox */
   -ms-overflow-style: none;
-  /* IE and Edge */
 }
 
 html::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Opera */
 }
 
 body {
@@ -82,6 +111,7 @@ body {
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body::-webkit-scrollbar {
@@ -107,157 +137,56 @@ body::-webkit-scrollbar {
 
 /* ─── Keyframe Animations ────────────────────────────────────── */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
-
 @keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  20% {
-    transform: translateX(-8px);
-  }
-
-  40% {
-    transform: translateX(8px);
-  }
-
-  60% {
-    transform: translateX(-5px);
-  }
-
-  80% {
-    transform: translateX(5px);
-  }
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
 }
-
 @keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.06);
-  }
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
 }
-
 @keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-
-  100% {
-    background-position: 200% center;
-  }
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
-
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  70% {
-    transform: scale(0.9);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
 }
-
 @keyframes gradientShift {
-
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 /* ─── Utility ───────────────────────────────────────────────── */
-.animate-fadeInUp {
-  animation: fadeInUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.35s ease both;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.animate-bounceIn {
-  animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
+.animate-fadeInUp  { animation: fadeInUp 0.45s cubic-bezier(0.4,0,0.2,1) both; }
+.animate-fadeIn    { animation: fadeIn 0.35s ease both; }
+.animate-scaleIn   { animation: scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-bounceIn  { animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
 
 /* Skeleton */
 .skeleton {
@@ -286,26 +215,15 @@ body::-webkit-scrollbar {
   position: relative;
   overflow: hidden;
 }
-
-.btn:active {
-  transform: scale(0.97);
-}
-
-.btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.btn:disabled:hover {
-  transform: none;
-}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled:hover { transform: none; }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   box-shadow: 0 4px 20px rgba(164, 53, 240, 0.35);
 }
-
 .btn-primary:not(:disabled):hover {
   box-shadow: 0 8px 30px rgba(164, 53, 240, 0.55);
   transform: translateY(-2px);
@@ -316,7 +234,6 @@ body::-webkit-scrollbar {
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
-
 .btn-secondary:not(:disabled):hover {
   background: var(--bg-glass-hover);
   border-color: var(--border-hover);
@@ -329,7 +246,6 @@ body::-webkit-scrollbar {
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
-
 .btn-ghost:not(:disabled):hover {
   border-color: var(--primary);
   color: var(--primary-light);
@@ -340,29 +256,10 @@ body::-webkit-scrollbar {
   color: white;
   box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
 }
-
 .btn-success:not(:disabled):hover {
   box-shadow: 0 8px 28px rgba(29, 185, 84, 0.5);
   transform: translateY(-2px);
 }
 
-.btn-lg {
-  padding: 15px 34px;
-  font-size: 16px;
-  border-radius: var(--radius-lg);
-}
-
-.btn-sm {
-  padding: 8px 16px;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-}
-
-/* ─── Scrollbar-less overflow for dot row ───────────────────── */
-.no-scrollbar {
-  scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+.btn-lg { padding: 15px 34px; font-size: 16px; border-radius: var(--radius-lg); }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: var(--radius-sm); }

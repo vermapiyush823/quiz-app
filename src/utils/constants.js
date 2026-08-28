@@ -53,9 +53,9 @@ export const DIFFICULTY_CONFIG = {
 
 export const RESULT_CONFIG = [
   { min: 90, emoji: '🏆', title: 'Outstanding!',     subtitle: "You've mastered CIS-DF — exceptional performance!" },
-  { min: 75, emoji: '🎉', title: 'Great Job!',        subtitle: 'Solid understanding of CMDB & CSDM fundamentals. Keep it up!' },
+  { min: 70, emoji: '🎉', title: 'Passed!',          subtitle: 'Congratulations! You passed the ServiceNow CIS-DF benchmark (70%+).' },
   { min: 55, emoji: '📚', title: 'Good Effort!',      subtitle: "You're on the right path. Review the explanations to reinforce key concepts." },
-  { min: 35, emoji: '💪', title: 'Keep Going!',       subtitle: "Don't give up — review the material and try again." },
+  { min: 35, emoji: '💪', title: 'Keep Going!',       subtitle: "Don't give up — review the cheat sheet and try again." },
   { min: 0,  emoji: '🌱', title: 'Room to Grow!',     subtitle: 'Review the question explanations and take another round!' },
 ];
 
@@ -82,19 +82,54 @@ export function getDominantDifficulty(questions) {
 
 export function buildQuizSets(allQuestions) {
   const sets = [];
+  const total = allQuestions.length;
+  const half = Math.ceil(total / 2);
 
-  // Full mixed quiz
+  // 1. Exam Set 1 (Questions 1 to 76)
+  const set1Questions = allQuestions.slice(0, half);
   sets.push({
-    id: 'full',
-    title: 'Complete CIS-DF Certification Exam',
-    description: 'Comprehensive practice exam covering IRE, CMDB Health, Data Manager, CSDM, Integrations, and CMDB Workspace.',
+    id: 'set-1',
+    title: `CIS-DF Practice Exam 1 (${set1Questions.length} Qs)`,
+    badge: 'Exam Set 1',
+    description: `Comprehensive mock exam 1 with ${set1Questions.length} questions covering IRE, CMDB Health, CSDM, and Governance.`,
     category: 'Mixed',
-    questions: shuffle(allQuestions),
-    timePerQ: 45,
+    questions: set1Questions,
+    timePerQ: 60, // 60s per Q in practice mode
+    totalTimeMins: Math.round((set1Questions.length * 75) / 60), // ~95 mins for real exam mode
     featured: true,
+    isExamSet: true,
   });
 
-  // Per-category quizzes
+  // 2. Exam Set 2 (Questions 77 to 153)
+  const set2Questions = allQuestions.slice(half);
+  sets.push({
+    id: 'set-2',
+    title: `CIS-DF Practice Exam 2 (${set2Questions.length} Qs)`,
+    badge: 'Exam Set 2',
+    description: `Comprehensive mock exam 2 with ${set2Questions.length} questions covering Data Manager, Ingestion, Workspaces, and CSDM 5.0.`,
+    category: 'Mixed',
+    questions: set2Questions,
+    timePerQ: 60,
+    totalTimeMins: Math.round((set2Questions.length * 75) / 60),
+    featured: true,
+    isExamSet: true,
+  });
+
+  // 3. Complete Question Bank (All 153 Qs)
+  sets.push({
+    id: 'full',
+    title: `Complete CIS-DF Master Bank (${total} Qs)`,
+    badge: 'Full Question Bank',
+    description: `The complete question bank with all ${total} questions for comprehensive preparation.`,
+    category: 'Mixed',
+    questions: allQuestions,
+    timePerQ: 60,
+    totalTimeMins: Math.round((total * 75) / 60),
+    featured: true,
+    isExamSet: true,
+  });
+
+  // 4. Per-category domain quizzes
   const categoryDescriptions = {
     'IRE & Reconciliation': 'Master Identification Rules, Reconciliation Rules, Dynamic Reconciliation, and De-duplication logic.',
     'CMDB Health & Dashboards': 'Test your knowledge on Completeness, Correctness, Compliance KPIs, Staleness, and Inclusion Rules.',
@@ -107,15 +142,18 @@ export function buildQuizSets(allQuestions) {
   const cats = [...new Set(allQuestions.map(q => q.category))];
   cats.forEach(cat => {
     const qs = allQuestions.filter(q => q.category === cat);
-    if (qs.length >= 2) {
+    if (qs.length >= 1) {
       sets.push({
         id: cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         title: `${cat}`,
+        badge: 'Domain Quiz',
         description: categoryDescriptions[cat] || `Practice ${qs.length} curated questions on ${cat}.`,
         category: cat,
         questions: qs,
-        timePerQ: 40,
+        timePerQ: 50,
+        totalTimeMins: Math.round((qs.length * 60) / 60),
         featured: false,
+        isExamSet: false,
       });
     }
   });

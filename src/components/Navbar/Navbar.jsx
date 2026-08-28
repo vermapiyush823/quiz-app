@@ -2,8 +2,8 @@ import styles from './Navbar.module.css';
 import { useQuiz } from '../../context/QuizContext';
 
 export default function Navbar() {
-  const { state, goHome, goToQuickLearning } = useQuiz();
-  const { page, allQuestions, answers } = state;
+  const { state, toggleTheme, goHome, goToQuickLearning } = useQuiz();
+  const { page, allQuestions, answers, theme } = state;
 
   const answeredCount = answers.filter(Boolean).length;
   const correctCount = answers.filter(a => a?.isCorrect).length;
@@ -35,11 +35,11 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Right badges */}
+        {/* Right tools: Question Counter, Live Score & Theme Toggle */}
         <div className={styles.right}>
           <div className={styles.badge}>
             <span>📚</span>
-            <span>{allQuestions.length || '125'} Questions</span>
+            <span>{allQuestions.length || 153} Questions</span>
           </div>
 
           {page === 'quiz' && answeredCount > 0 && (
@@ -48,6 +48,16 @@ export default function Navbar() {
               <span>{correctCount}/{answeredCount}</span>
             </div>
           )}
+
+          {/* Theme Toggle Button */}
+          <button
+            className={styles.themeToggleBtn}
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </div>
       </div>
     </nav>

@@ -1,68 +1,59 @@
 .page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 56px 24px 80px;
+  padding: 40px 20px 80px;
 }
 
-/* ── Hero ────────────────────────────────────────────────────── */
+/* ── Hero ──────────────────────────────────────────────────── */
 .hero {
   text-align: center;
-  padding: 64px 20px 80px;
+  padding: 48px 24px;
+  background: radial-gradient(circle at 50% 20%, rgba(164, 53, 240, 0.15), transparent 70%),
+              var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  margin-bottom: 40px;
   position: relative;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 700px;
-  height: 500px;
-  background: radial-gradient(ellipse, rgba(164, 53, 240, 0.1) 0%, transparent 65%);
-  pointer-events: none;
+  overflow: hidden;
 }
 
 .heroBadge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 20px;
-  background: rgba(164, 53, 240, 0.1);
+  padding: 6px 16px;
+  background: rgba(164, 53, 240, 0.12);
   border: 1px solid rgba(164, 53, 240, 0.3);
   border-radius: var(--radius-pill);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary-light);
-  letter-spacing: 0.3px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .heroTitle {
   font-family: var(--font-heading);
-  font-size: clamp(36px, 6vw, 64px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -1.5px;
-  margin-bottom: 20px;
+  font-size: clamp(28px, 4.5vw, 48px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -1px;
   color: var(--text-primary);
+  margin-bottom: 16px;
 }
 
 .heroGradient {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light) 50%, var(--accent));
-  background-size: 200% 200%;
-  animation: gradientShift 4s ease infinite;
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .heroSubtitle {
-  font-size: clamp(15px, 2vw, 18px);
+  font-size: clamp(14px, 2vw, 17px);
   color: var(--text-secondary);
-  max-width: 560px;
-  margin: 0 auto 40px;
-  line-height: 1.75;
+  max-width: 680px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
 }
 
 .heroActions {
@@ -71,156 +62,187 @@
   justify-content: center;
   gap: 14px;
   flex-wrap: wrap;
+  margin-bottom: 40px;
 }
 
 .heroStats {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  margin-top: 60px;
-  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+  max-width: 650px;
+  margin: 0 auto;
 }
 
 .statBlock {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.statBlock > div:not(.statDivider) {
+  flex: 1;
   text-align: center;
-  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
 .statDivider {
+  position: absolute;
+  left: 0;
+  top: 15%;
+  height: 70%;
   width: 1px;
-  height: 44px;
   background: var(--border);
-  flex-shrink: 0;
 }
 
 .statVal {
   font-family: var(--font-heading);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .statLabel {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-top: 2px;
 }
 
-/* ── Featured ────────────────────────────────────────────────── */
-.featuredWrapper {
-  margin-bottom: 52px;
-  animation-delay: 0.1s;
+/* ── Exam Sets Showcase (2 Full Sets) ───────────────────────── */
+.examSetsShowcase {
+  margin-bottom: 48px;
 }
 
-.featured {
+.sectionSubBadge {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.sectionHeaderDesc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin-top: 4px;
+}
+
+.examGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.featuredExamCard {
   background: var(--bg-card);
-  border: 1px solid rgba(164, 53, 240, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-xl);
-  padding: 36px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+}
+
+.featuredExamCard:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(164, 53, 240, 0.2);
+}
+
+.examCardGlow {
+  height: 5px;
+  width: 100%;
+}
+
+.examCardBody {
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.examCardTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.featured::after {
-  content: '';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(164, 53, 240, 0.07) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.featuredTopLine {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary-light));
-}
-
-.featuredContent { flex: 1; }
-
-.featuredLabel {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 1px;
   margin-bottom: 12px;
 }
 
-.featuredTitle {
-  font-family: var(--font-heading);
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
-  margin-bottom: 10px;
+.examPill {
+  padding: 3px 10px;
+  background: rgba(164, 53, 240, 0.15);
+  color: var(--primary-light);
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: 700;
 }
 
-.featuredDesc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.75;
-  max-width: 500px;
-  margin-bottom: 20px;
-}
-
-.featuredMeta {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.metaItem {
-  font-size: 13px;
+.examTimeTag {
+  font-size: 12px;
   color: var(--text-muted);
 }
 
-.featuredVisual {
-  flex-shrink: 0;
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(164,53,240,0.15), rgba(246,156,8,0.08));
-  border: 2px solid rgba(164,53,240,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 56px;
+.examCardTitle {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
-/* ── Quiz Sets Grid ──────────────────────────────────────────── */
-.quizSetsSection { }
+.examCardDesc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.examCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.examCardButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── All Quizzes & Domain Drills Section ────────────────────── */
+.quizSetsSection {
+  margin-top: 32px;
+}
 
 .sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .sectionTitle {
   font-family: var(--font-heading);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .filters {
@@ -230,34 +252,47 @@
 }
 
 .chip {
-  padding: 7px 16px;
-  background: var(--bg-glass);
+  padding: 7px 14px;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  font-size: 13px;
-  font-weight: 500;
   color: var(--text-secondary);
+  font-family: var(--font-base);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  font-family: var(--font-base);
+  white-space: nowrap;
 }
 
 .chip:hover {
+  background: var(--bg-elevated);
   border-color: var(--border-hover);
   color: var(--text-primary);
-  background: var(--bg-glass-hover);
 }
 
 .chipActive {
-  background: rgba(164, 53, 240, 0.14);
-  border-color: rgba(164, 53, 240, 0.5);
+  background: rgba(164, 53, 240, 0.15);
+  border-color: var(--primary);
   color: var(--primary-light);
+  font-weight: 700;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+}
+
+/* ── Error & Skeletons ───────────────────────────────────────── */
+.errorBox {
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-secondary);
 }
 
 .skeletonCard {
@@ -267,29 +302,27 @@
   overflow: hidden;
 }
 
-.errorBox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - var(--nav-height));
-  gap: 16px;
-  padding: 40px;
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-/* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .page { padding: 48px 16px 60px; }
-  .featured { flex-direction: column; padding: 24px; }
-  .featuredVisual { display: none; }
-  .heroStats { gap: 0; }
-  .statDivider { display: none; }
-  .statBlock > div:not(.statDivider) { padding: 8px 16px; }
-}
-
-@media (max-width: 480px) {
-  .hero { padding: 40px 0 56px; }
-  .grid { grid-template-columns: 1fr; }
+  .page {
+    padding: 20px 14px 60px;
+  }
+  .hero {
+    padding: 32px 16px;
+    margin-bottom: 28px;
+  }
+  .heroActions {
+    flex-direction: column;
+  }
+  .heroActions .btn {
+    width: 100%;
+  }
+  .examGrid {
+    grid-template-columns: 1fr;
+  }
+  .examCardButtons {
+    grid-template-columns: 1fr;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

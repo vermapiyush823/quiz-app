@@ -1,24 +1,27 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './ResultsPage.module.css';
 import { useQuiz } from '../../context/QuizContext';
 import { RESULT_CONFIG, formatTime } from '../../utils/constants';
 
 export default function ResultsPage() {
-  const { state, restartQuiz, goHome } = useQuiz();
-  const { activeQuiz, answers, quizStartTime } = state;
-  const questions = activeQuiz.questions;
+  const { state, restartQuiz, startQuiz, goHome } = useQuiz();
+  const { activeQuiz, answers, flags, quizStartTime, mode } = state;
+  const questions = activeQuiz?.questions || [];
+
+  const [filter, setFilter] = useState('all'); // 'all' | 'incorrect' | 'correct' | 'flagged' | 'skipped'
 
   const correct = answers.filter(a => a?.isCorrect).length;
-  const wrong   = answers.filter(a => a && !a.isCorrect && a.selectedIndex !== -1).length;
-  const skipped = answers.filter(a => !a || a.selectedIndex === -1).length;
+  const wrong   = answers.filter(a => a && !a.isCorrect && a.selectedIndices && a.selectedIndices.length > 0).length;
+  const skipped = answers.filter(a => !a || !a.selectedIndices || a.selectedIndices.length === 0).length;
+  const flagged = flags.filter(Boolean).length;
   const total   = questions.length;
-  const pct     = Math.round((correct / total) * 100);
-  const elapsed = Math.round((Date.now() - quizStartTime) / 1000);
+  const pct     = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const elapsed = Math.round((Date.now() - (quizStartTime || Date.now())) / 1000);
 
-  const result  = RESULT_CONFIG.find(r => pct >= r.min);
-  const ringColor = pct >= 75 ? '#1db954' : pct >= 50 ? '#f69c08' : '#e74c3c';
+  const isPassed = pct >= 70;
+  const result = RESULT_CONFIG.find(r => pct >= r.min) || RESULT_CONFIG[RESULT_CONFIG.length - 1];
+  const ringColor = isPassed ? '#1db954' : '#e74c3c';
 
-  // Animate ring
   const ringRef = useRef(null);
   const CIRC = 2 * Math.PI * 70;
 
@@ -31,16 +34,31 @@ export default function ResultsPage() {
     });
   }, [pct, CIRC]);
 
+  // Filter questions
+  const filteredQuestions = questions.map((q, i) => ({ q, answer: answers[i], isFlagged: flags[i], index: i }))
+    .filter(item => {
+      if (filter === 'incorrect') return item.answer && !item.answer.isCorrect && item.answer.selectedIndices?.length > 0;
+      if (filter === 'correct') return item.answer?.isCorrect;
+      if (filter === 'flagged') return item.isFlagged;
+      if (filter === 'skipped') return !item.answer || !item.answer.selectedIndices || item.answer.selectedIndices.length === 0;
+      return true;
+    });
+
   return (
     <div className={styles.page}>
-      {/* Header */}
+      {/* ── Top Header ────────────────────────────────────────── */}
       <div className={`${styles.header} animate-bounceIn`}>
-        <span className={styles.emoji}>{result.emoji}</span>
+        <div className={styles.passBadge} style={{ background: isPassed ? 'rgba(29, 185, 84, 0.15)' : 'rgba(231, 76, 60, 0.15)', color: isPassed ? '#1db954' : '#e74c3c' }}>
+          {isPassed ? '🏆 PASSED (70%+ Requirement Met)' : '❌ NOT PASSED (70% Required)'}
+        </div>
         <h1 className={styles.title}>{result.title}</h1>
         <p className={styles.subtitle}>{result.subtitle}</p>
+        <span className={styles.modeTag}>
+          {mode === 'exam' ? '⏱️ Real Exam Attempt' : '⚡ Practice Mode Session'} • {activeQuiz?.title}
+        </span>
       </div>
 
-      {/* Score Ring */}
+      {/* ── Score Ring Card ───────────────────────────────────── */}
       <div className={`${styles.scoreCard} animate-fadeInUp`}>
         <div className={styles.ringTop} style={{ background: ringColor }} />
 
@@ -66,49 +84,96 @@ export default function ResultsPage() {
         </div>
 
         <div className={styles.statsRow}>
-          <StatBlock value={correct} label="Correct" color="#1db954" />
-          <StatBlock value={wrong}   label="Wrong"   color="#e74c3c" />
-          <StatBlock value={skipped} label="Skipped" color="#6b6b6b" />
+          <StatBlock value={correct} label="Correct" color="#1db954" icon="✓" />
+          <StatBlock value={wrong}   label="Incorrect" color="#e74c3c" icon="✗" />
+          <StatBlock value={skipped} label="Skipped" color="#6b6b6b" icon="⚪" />
+          {mode === 'exam' && <StatBlock value={flagged} label="Flagged" color="#f69c08" icon="🚩" />}
         </div>
       </div>
 
-      {/* Extra stats */}
-      <div className={`${styles.extraStats} animate-fadeInUp`} style={{ animationDelay: '0.15s' }}>
-        <ExtraStat label="Final Score"  value={`${correct}/${total}`} />
-        <ExtraStat label="Accuracy"     value={`${pct}%`}            color="var(--primary-light)" />
-        <ExtraStat label="Time Taken"   value={formatTime(elapsed)}   color="var(--accent)" />
+      {/* ── Metric Highlights ─────────────────────────────────── */}
+      <div className={`${styles.extraStats} animate-fadeInUp`} style={{ animationDelay: '0.1s' }}>
+        <ExtraStat label="Final Score" value={`${correct} / ${total}`} />
+        <ExtraStat label="Passing Mark" value="70%" color="#c56af5" />
+        <ExtraStat label="Accuracy" value={`${pct}%`} color={ringColor} />
+        <ExtraStat label="Time Taken" value={formatTime(elapsed)} color="var(--accent)" />
       </div>
 
-      {/* Perf bars */}
-      <div className={`${styles.perfCard} animate-fadeInUp`} style={{ animationDelay: '0.2s' }}>
-        <h3 className={styles.perfTitle}>📊 Performance Breakdown</h3>
-        <PerfBar label="Correct" count={correct} total={total} color="#1db954" delay={0.5} />
-        <PerfBar label="Wrong"   count={wrong}   total={total} color="#e74c3c" delay={0.65} />
-        <PerfBar label="Skipped" count={skipped} total={total} color="#6b6b6b" delay={0.8} />
+      {/* ── Actions Bar ───────────────────────────────────────── */}
+      <div className={`${styles.actionBar} animate-fadeInUp`} style={{ animationDelay: '0.15s' }}>
+        <button className="btn btn-primary btn-lg" onClick={restartQuiz}>
+          🔄 Retake This Test
+        </button>
+        <button className="btn btn-secondary btn-lg" onClick={() => startQuiz(activeQuiz.id, mode === 'exam' ? 'practice' : 'exam')}>
+          {mode === 'exam' ? '⚡ Switch to Practice Mode' : '⏱️ Try Real Exam Simulation'}
+        </button>
+        <button className="btn btn-ghost btn-lg" onClick={goHome}>
+          🏠 Back to All Quizzes
+        </button>
       </div>
 
-      {/* Detailed Review */}
-      <div className={`${styles.reviewSection} animate-fadeInUp`} style={{ animationDelay: '0.25s' }}>
-        <h2 className={styles.reviewTitle}>📝 Detailed Review</h2>
-        {questions.map((q, i) => (
-          <ReviewItem key={q.id} q={q} answer={answers[i]} index={i} />
-        ))}
-      </div>
+      {/* ── Detailed Question Review Section ─────────────────── */}
+      <div className={`${styles.reviewSection} animate-fadeInUp`} style={{ animationDelay: '0.2s' }}>
+        <div className={styles.reviewSectionHeader}>
+          <div>
+            <h2 className={styles.reviewTitle}>📝 Detailed Answer Review</h2>
+            <p className={styles.reviewSub}>Review all questions with complete technical explanations and key CIS-DF takeaways.</p>
+          </div>
 
-      {/* Actions */}
-      <div className={`${styles.actions} animate-fadeInUp`} style={{ animationDelay: '0.3s' }}>
-        <button className="btn btn-primary btn-lg" onClick={restartQuiz}>🔄 Try Again</button>
-        <button className="btn btn-secondary btn-lg" onClick={goHome}>🏠 Browse More Quizzes</button>
+          {/* Filter Pills */}
+          <div className={styles.filterPills}>
+            <button
+              className={`${styles.filterPill} ${filter === 'all' ? styles.filterPillActive : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All ({total})
+            </button>
+            <button
+              className={`${styles.filterPill} ${filter === 'incorrect' ? styles.filterPillActive : ''}`}
+              onClick={() => setFilter('incorrect')}
+            >
+              ❌ Incorrect ({wrong})
+            </button>
+            <button
+              className={`${styles.filterPill} ${filter === 'correct' ? styles.filterPillActive : ''}`}
+              onClick={() => setFilter('correct')}
+            >
+              ✅ Correct ({correct})
+            </button>
+            {mode === 'exam' && flagged > 0 && (
+              <button
+                className={`${styles.filterPill} ${filter === 'flagged' ? styles.filterPillActive : ''}`}
+                onClick={() => setFilter('flagged')}
+              >
+                🚩 Flagged ({flagged})
+              </button>
+            )}
+            {skipped > 0 && (
+              <button
+                className={`${styles.filterPill} ${filter === 'skipped' ? styles.filterPillActive : ''}`}
+                onClick={() => setFilter('skipped')}
+              >
+                ⚪ Skipped ({skipped})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Question Review Cards */}
+        <div className={styles.reviewList}>
+          {filteredQuestions.map(({ q, answer, isFlagged, index }) => (
+            <ReviewItem key={q.id || index} q={q} answer={answer} isFlagged={isFlagged} index={index} />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-/* ── Sub-components ─────────────────────────────────────────── */
-function StatBlock({ value, label, color }) {
+function StatBlock({ value, label, color, icon }) {
   return (
     <div className={styles.statBlock}>
-      <span className={styles.statVal} style={{ color }}>{value}</span>
+      <span className={styles.statVal} style={{ color }}>{icon} {value}</span>
       <span className={styles.statDesc}>{label}</span>
     </div>
   );
@@ -123,66 +188,60 @@ function ExtraStat({ label, value, color }) {
   );
 }
 
-function PerfBar({ label, count, total, color, delay }) {
-  const pct = total > 0 ? (count / total) * 100 : 0;
-  return (
-    <div className={styles.perfRow}>
-      <span className={styles.perfLabel}>{label}</span>
-      <div className={styles.perfTrack}>
-        <div
-          className={styles.perfFill}
-          style={{
-            width: `${pct}%`,
-            background: color,
-            transitionDelay: `${delay}s`,
-          }}
-        />
-      </div>
-      <span className={styles.perfCount} style={{ color }}>{count}</span>
-    </div>
-  );
-}
-
-function ReviewItem({ q, answer, index }) {
+function ReviewItem({ q, answer, isFlagged, index }) {
   const isCorrect = answer?.isCorrect;
-  const selectedIndices = answer?.selectedIndices ?? (answer?.selectedIndex !== undefined && answer.selectedIndex !== -1 ? [answer.selectedIndex] : []);
+  const selectedIndices = answer?.selectedIndices || (answer?.selectedIndex !== undefined && answer.selectedIndex !== -1 ? [answer.selectedIndex] : []);
   const targetIndices = q.correctIndices || (q.correctIndex !== undefined ? [q.correctIndex] : [0]);
 
-  const yourAnswerText = selectedIndices.length > 0
-    ? selectedIndices.map(i => q.options[i]).join('; ')
-    : null;
-
-  const correctAnswerText = targetIndices.map(i => q.options[i]).join('; ');
-
   return (
-    <div className={styles.reviewItem}>
-      <div className={styles.reviewHeader}>
-        <div className={`${styles.reviewIcon} ${isCorrect ? styles.iconCorrect : styles.iconWrong}`}>
-          {isCorrect ? '✓' : '✗'}
-        </div>
-        <p className={styles.reviewQ}>
-          <strong>Q{index + 1}.</strong> {q.question}
-        </p>
-      </div>
-
-      <div className={styles.reviewAnswers}>
-        {yourAnswerText && !isCorrect && (
-          <div className={`${styles.ansRow} ${styles.ansWrong}`}>
-            ✗ Your answer: {yourAnswerText}
-          </div>
-        )}
-        {!yourAnswerText && (
-          <div className={`${styles.ansRow} ${styles.ansSkipped}`}>
-            ⏱ Time expired / Skipped
-          </div>
-        )}
-        <div className={`${styles.ansRow} ${styles.ansCorrect}`}>
-          ✓ Correct: {correctAnswerText}
+    <div className={`${styles.reviewCard} ${isCorrect ? styles.reviewCardCorrect : styles.reviewCardWrong}`}>
+      <div className={styles.reviewCardHeader}>
+        <div className={styles.reviewCardMeta}>
+          <span className={`${styles.statusBadge} ${isCorrect ? styles.badgeCorrect : styles.badgeWrong}`}>
+            {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+          </span>
+          <span className={styles.qIndexTag}>Question {index + 1}</span>
+          <span className={styles.qCatTag}>{q.category}</span>
+          {isFlagged && <span className={styles.flaggedTag}>🚩 Flagged</span>}
         </div>
       </div>
 
-      <div className={styles.reviewExp}>
-        💡 {q.explanation}
+      <h3 className={styles.reviewQuestionText}>{q.question}</h3>
+
+      {/* Options Breakdown */}
+      <div className={styles.reviewOptionsList}>
+        {q.options.map((opt, idx) => {
+          const isTarget = targetIndices.includes(idx);
+          const isUserPicked = selectedIndices.includes(idx);
+
+          let optionStyle = styles.reviewOptionNormal;
+          if (isTarget && isUserPicked) optionStyle = styles.reviewOptionTargetPicked;
+          else if (isTarget && !isUserPicked) optionStyle = styles.reviewOptionTargetMissed;
+          else if (!isTarget && isUserPicked) optionStyle = styles.reviewOptionWrongPicked;
+
+          return (
+            <div key={idx} className={`${styles.reviewOptionRow} ${optionStyle}`}>
+              <div className={styles.reviewOptionIndicator}>
+                <span className={styles.reviewOptionLetter}>{String.fromCharCode(65 + idx)}</span>
+                {isTarget && <span className={styles.correctMarker}>✓</span>}
+                {!isTarget && isUserPicked && <span className={styles.wrongMarker}>✗</span>}
+              </div>
+              <span className={styles.reviewOptionText}>{opt}</span>
+              {isTarget && isUserPicked && <span className={styles.tagPickedCorrect}>Your Correct Pick</span>}
+              {!isTarget && isUserPicked && <span className={styles.tagPickedWrong}>Your Selection</span>}
+              {isTarget && !isUserPicked && <span className={styles.tagMissedCorrect}>Correct Answer</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* In-depth Explanation Box */}
+      <div className={styles.reviewExpBox}>
+        <div className={styles.reviewExpHeader}>
+          <span className={styles.reviewExpIcon}>💡</span>
+          <strong className={styles.reviewExpTitle}>Technical Explanation &amp; Rationale:</strong>
+        </div>
+        <p className={styles.reviewExpText}>{q.explanation}</p>
       </div>
     </div>
   );

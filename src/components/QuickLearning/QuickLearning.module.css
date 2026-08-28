@@ -191,7 +191,7 @@
 
 /* ── CSDM 5.0 CONCEPTUAL ARCHITECTURE IMAGE CARD ─────────────── */
 .imageCard {
-  background: #0f1117;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -220,7 +220,7 @@
 
 .imageWrapper {
   padding: 16px;
-  background: #0b0d13;
+  background: var(--bg-elevated);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -234,7 +234,7 @@
   height: auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-md);
   display: block;
 }
 

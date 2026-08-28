@@ -1,31 +1,30 @@
 .nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
   height: var(--nav-height);
-  background: rgba(13, 13, 13, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  backdrop-filter: blur(12px);
 }
 
 .inner {
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: 16px;
 }
 
+/* ── Logo ────────────────────────────────────────────────────── */
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -33,63 +32,66 @@
 }
 
 .logoIcon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 0 16px var(--primary-glow);
-  transition: var(--transition);
-}
-
-.logo:hover .logoIcon {
-  box-shadow: 0 0 24px rgba(164,53,240,0.45);
-  transform: scale(1.05);
+  font-size: 20px;
+  box-shadow: 0 4px 14px rgba(164, 53, 240, 0.4);
 }
 
 .logoText {
   font-family: var(--font-heading);
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
 }
 
-.logoAccent { color: var(--primary-light); }
+.logoAccent {
+  color: var(--primary-light);
+}
 
+/* ── Center Nav Links ────────────────────────────────────────── */
 .navLinks {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: var(--bg-elevated);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
 }
 
 .navLink {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-secondary);
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  font-family: var(--font-base);
   font-size: 13px;
   font-weight: 600;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
-  font-family: var(--font-base);
+  white-space: nowrap;
 }
 
 .navLink:hover {
-  background: var(--bg-glass-hover);
   color: var(--text-primary);
 }
 
 .navLinkActive {
-  background: rgba(164, 53, 240, 0.14);
-  border-color: rgba(164, 53, 240, 0.35);
+  background: var(--bg-card);
   color: var(--primary-light);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* ── Right side ──────────────────────────────────────────────── */
 .right {
   display: flex;
   align-items: center;
@@ -100,21 +102,40 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  background: var(--bg-glass);
+  padding: 6px 12px;
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
-  animation: fadeIn 0.3s ease;
 }
 
 .scoreBadge {
-  background: rgba(164,53,240,0.1);
-  border-color: rgba(164,53,240,0.3);
-  color: var(--primary-light);
-  font-weight: 700;
+  color: var(--success);
+  border-color: rgba(29, 185, 84, 0.3);
+  background: var(--success-light);
+}
+
+/* ── Theme Toggle Button ─────────────────────────────────────── */
+.themeToggleBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.themeToggleBtn:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-hover);
+  transform: scale(1.08) rotate(15deg);
 }
 
 @media (max-width: 768px) {

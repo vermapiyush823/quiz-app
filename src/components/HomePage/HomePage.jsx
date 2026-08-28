@@ -1,25 +1,38 @@
 import { useState } from 'react';
 import styles from './HomePage.module.css';
 import QuizCard from '../QuizCard/QuizCard';
+import ModeModal from '../ModeModal/ModeModal';
 import { useQuiz } from '../../context/QuizContext';
-import { CATEGORY_CONFIG, DIFFICULTY_CONFIG, getDominantDifficulty } from '../../utils/constants';
+import { CATEGORY_CONFIG } from '../../utils/constants';
 
 const ALL = 'All';
+const EXAM_SETS = 'Exam Sets';
+const DOMAINS = 'Domain Quizzes';
 
 export default function HomePage() {
-  const { state, startQuiz, goToQuickLearning } = useQuiz();
+  const { state, openModeModal, startQuiz, goToQuickLearning } = useQuiz();
   const { quizSets, loading, error } = state;
 
   const [activeFilter, setActiveFilter] = useState(ALL);
 
-  const featured = quizSets.find(s => s.featured);
-  const nonFeatured = quizSets.filter(s => !s.featured);
+  const examSets = quizSets.filter(s => s.isExamSet);
+  const domainSets = quizSets.filter(s => !s.isExamSet);
 
-  const categories = [ALL, ...new Set(nonFeatured.map(s => s.category))];
+  const categories = [
+    ALL,
+    EXAM_SETS,
+    DOMAINS,
+    ...new Set(domainSets.map(s => s.category))
+  ];
 
-  const filtered = activeFilter === ALL
-    ? nonFeatured
-    : nonFeatured.filter(s => s.category === activeFilter);
+  let filtered = quizSets;
+  if (activeFilter === EXAM_SETS) {
+    filtered = examSets;
+  } else if (activeFilter === DOMAINS) {
+    filtered = domainSets;
+  } else if (activeFilter !== ALL) {
+    filtered = domainSets.filter(s => s.category === activeFilter);
+  }
 
   if (error) {
     return (
@@ -31,39 +44,43 @@ export default function HomePage() {
     );
   }
 
+  const set1 = quizSets.find(s => s.id === 'set-1');
+  const set2 = quizSets.find(s => s.id === 'set-2');
+
   return (
     <div className={styles.page}>
+      <ModeModal />
+
       {/* ── Hero ─────────────────────────────────── */}
       <section className={`${styles.hero} animate-fadeInUp`}>
-        <div className={styles.heroBadge}>🎯 ServiceNow CIS-DF Exam Practice</div>
+        <div className={styles.heroBadge}>🎯 ServiceNow CIS-DF Exam Preparation</div>
         <h1 className={styles.heroTitle}>
           Certified Implementation Specialist<br />
           <span className={styles.heroGradient}>Data Foundations (CIS-DF)</span>
         </h1>
         <p className={styles.heroSubtitle}>
-          Master the ServiceNow CMDB and CSDM with 153 comprehensive exam questions, multi-select scenarios, detailed explanations, and category quizzes.
+          Master the ServiceNow CMDB &amp; CSDM with 160 exam questions divided into two balanced 80-question mock exams, multi-select scenarios, rich explanations, and real exam simulations.
         </p>
+
+        {/* Hero Quick Start Actions */}
         <div className={styles.heroActions}>
-          <button className="btn btn-primary btn-lg" onClick={() => startQuiz('full')}>
-            🚀 Start Full Exam (153 Qs)
+          <button className="btn btn-primary btn-lg" onClick={() => openModeModal('set-1')}>
+            🚀 Practice Exam 1 (80 Qs)
           </button>
-          <button className="btn btn-secondary btn-lg" onClick={goToQuickLearning}>
+          <button className="btn btn-secondary btn-lg" onClick={() => openModeModal('set-2')}>
+            🎯 Practice Exam 2 (80 Qs)
+          </button>
+          <button className="btn btn-ghost btn-lg" onClick={goToQuickLearning}>
             ⚡ Quick Learning Cheat Sheet
-          </button>
-          <button
-            className="btn btn-ghost btn-lg"
-            onClick={() => document.getElementById('quiz-sets').scrollIntoView({ behavior: 'smooth' })}
-          >
-            Browse By Category ↓
           </button>
         </div>
 
         <div className={styles.heroStats}>
           {[
-            { val: '153', label: 'Exam Questions' },
-            { val: '6',   label: 'Domains' },
-            { val: '29',  label: 'Multi-Select Qs' },
-            { val: '100%', label: 'Free' },
+            { val: '160', label: 'Exam Questions' },
+            { val: '2',   label: '80-Q Exam Sets' },
+            { val: '2',   label: 'Test Modes' },
+            { val: '6',   label: 'Domain Quizzes' },
           ].map((s, i) => (
             <div key={i} className={styles.statBlock}>
               {i > 0 && <div className={styles.statDivider} />}
@@ -74,17 +91,84 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Featured Quiz ─────────────────────────── */}
-      {featured && (
-        <section className={`${styles.featuredWrapper} animate-fadeInUp`} style={{ animationDelay: '0.1s' }}>
-          <FeaturedQuiz set={featured} onStart={startQuiz} />
-        </section>
-      )}
+      {/* ── Exam Sets Highlight (Udemy-Style) ──────── */}
+      <section className={styles.examSetsShowcase}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <span className={styles.sectionSubBadge}>📝 Udemy-Style Test Modes</span>
+            <h2 className={styles.sectionTitle}>Full-Length Practice Exams</h2>
+          </div>
+          <p className={styles.sectionHeaderDesc}>
+            Choose between <strong>⚡ Practice Mode</strong> (instant answers &amp; explanations) or <strong>⏱️ Real Exam Mode</strong> (timed simulation with score report at the end).
+          </p>
+        </div>
 
-      {/* ── Quiz Cards ────────────────────────────── */}
+        <div className={styles.examGrid}>
+          {/* Exam Set 1 */}
+          {set1 && (
+            <div className={styles.featuredExamCard}>
+              <div className={styles.examCardGlow} style={{ background: 'linear-gradient(135deg, #a435f0, #c56af5)' }} />
+              <div className={styles.examCardBody}>
+                <div className={styles.examCardTop}>
+                  <span className={styles.examPill}>Set 1 of 2</span>
+                  <span className={styles.examTimeTag}>⏱️ ~95 min</span>
+                </div>
+                <h3 className={styles.examCardTitle}>{set1.title}</h3>
+                <p className={styles.examCardDesc}>{set1.description}</p>
+                <div className={styles.examCardMeta}>
+                  <span>📝 80 Questions</span>
+                  <span>● 70% Pass Mark</span>
+                  <span>● IRE, Health &amp; CSDM</span>
+                </div>
+                <div className={styles.examCardButtons}>
+                  <button className="btn btn-secondary" onClick={() => startQuiz('set-1', 'practice')}>
+                    ⚡ Practice Mode (Instant)
+                  </button>
+                  <button className="btn btn-primary" onClick={() => startQuiz('set-1', 'exam')}>
+                    ⏱️ Real Exam Simulation
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Exam Set 2 */}
+          {set2 && (
+            <div className={styles.featuredExamCard}>
+              <div className={styles.examCardGlow} style={{ background: 'linear-gradient(135deg, #f69c08, #ffb347)' }} />
+              <div className={styles.examCardBody}>
+                <div className={styles.examCardTop}>
+                  <span className={styles.examPill} style={{ background: 'rgba(246, 156, 8, 0.15)', color: '#ffc85e' }}>Set 2 of 2</span>
+                  <span className={styles.examTimeTag}>⏱️ ~95 min</span>
+                </div>
+                <h3 className={styles.examCardTitle}>{set2.title}</h3>
+                <p className={styles.examCardDesc}>{set2.description}</p>
+                <div className={styles.examCardMeta}>
+                  <span>📝 80 Questions</span>
+                  <span>● 70% Pass Mark</span>
+                  <span>● Governance, Ingestion &amp; 5.0</span>
+                </div>
+                <div className={styles.examCardButtons}>
+                  <button className="btn btn-secondary" onClick={() => startQuiz('set-2', 'practice')}>
+                    ⚡ Practice Mode (Instant)
+                  </button>
+                  <button className="btn btn-primary" onClick={() => startQuiz('set-2', 'exam')}>
+                    ⏱️ Real Exam Simulation
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── All Quizzes & Domain Drills ────────────── */}
       <section id="quiz-sets" className={styles.quizSetsSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Browse Quizzes</h2>
+          <div>
+            <h2 className={styles.sectionTitle}>Browse All Tests &amp; Domain Drills</h2>
+            <p className={styles.sectionHeaderDesc}>Practice specific CIS-DF knowledge areas or complete full exams.</p>
+          </div>
           <div className={styles.filters}>
             {categories.map(cat => (
               <button
@@ -92,7 +176,11 @@ export default function HomePage() {
                 className={`${styles.chip} ${activeFilter === cat ? styles.chipActive : ''}`}
                 onClick={() => setActiveFilter(cat)}
               >
-                {cat !== ALL && CATEGORY_CONFIG[cat] ? CATEGORY_CONFIG[cat].icon + ' ' : '🌐 '}{cat}
+                {cat === ALL && '🌐 '}
+                {cat === EXAM_SETS && '📝 '}
+                {cat === DOMAINS && '🎯 '}
+                {CATEGORY_CONFIG[cat] ? CATEGORY_CONFIG[cat].icon + ' ' : ''}
+                {cat}
               </button>
             ))}
           </div>
@@ -105,38 +193,11 @@ export default function HomePage() {
         ) : (
           <div className={styles.grid}>
             {filtered.map((set, i) => (
-              <QuizCard key={set.id} set={set} onStart={startQuiz} delay={i * 0.05} />
+              <QuizCard key={set.id} set={set} delay={i * 0.04} />
             ))}
           </div>
         )}
       </section>
-    </div>
-  );
-}
-
-function FeaturedQuiz({ set, onStart }) {
-  const conf = CATEGORY_CONFIG[set.category] || CATEGORY_CONFIG['Mixed'];
-  const difficulty = getDominantDifficulty(set.questions);
-  const diffConf = DIFFICULTY_CONFIG[difficulty];
-  const minutes = Math.ceil((set.questions.length * set.timePerQ) / 60);
-
-  return (
-    <div className={styles.featured}>
-      <div className={styles.featuredTopLine} />
-      <div className={styles.featuredContent}>
-        <div className={styles.featuredLabel}>⭐ Featured Quiz</div>
-        <h2 className={styles.featuredTitle}>{set.title}</h2>
-        <p className={styles.featuredDesc}>{set.description}</p>
-        <div className={styles.featuredMeta}>
-          <span className={styles.metaItem}>📝 {set.questions.length} Questions</span>
-          <span className={styles.metaItem}>⏱️ ~{minutes} min</span>
-          <span className={styles.metaItem} style={{ color: diffConf.color }}>● {diffConf.label}</span>
-        </div>
-        <button className="btn btn-primary btn-lg" onClick={() => onStart(set.id)}>
-          🚀 Start Full Quiz
-        </button>
-      </div>
-      <div className={styles.featuredVisual}>{conf.icon}</div>
     </div>
   );
 }
