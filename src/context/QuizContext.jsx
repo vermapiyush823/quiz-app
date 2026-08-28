@@ -1,13 +1,28 @@
 import { createContext, useContext, useReducer, useCallback, useRef, useEffect } from 'react';
 import { shuffle, buildQuizSets } from '../utils/constants';
 
+const STORAGE_KEY_SESSION = 'cis_df_active_session';
+const STORAGE_KEY_THEME = 'quiz_theme';
+
 // ─── State Shape ──────────────────────────────────────────────
 const getInitialTheme = () => {
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('quiz_theme');
+    const saved = localStorage.getItem(STORAGE_KEY_THEME);
     if (saved) return saved;
   }
   return 'dark';
+};
+
+const getSavedSession = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_SESSION);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.error('Failed to parse saved session:', e);
+    }
+  }
+  return null;
 };
 
 const initialState = {
@@ -18,6 +33,9 @@ const initialState = {
   quizSets: [],
   loading: true,
   error: null,
+
+  // Persistent in-progress session metadata
+  savedSession: getSavedSession(),
 
   // Selected quiz setup
   selectedQuizId: null,
@@ -45,13 +63,37 @@ function arraysEqual(a, b) {
 // ─── Reducer ─────────────────────────────────────────────────
 function quizReducer(state, action) {
   switch (action.type) {
-    case 'LOAD_SUCCESS':
+    case 'LOAD_SUCCESS': {
+      const sets = buildQuizSets(action.questions);
+      let restoredState = {};
+
+      // If there is an active session in local storage, link the quiz object
+      const saved = state.savedSession;
+      if (saved && saved.quizId) {
+        const foundQuiz = sets.find(s => s.id === saved.quizId);
+        if (foundQuiz) {
+          // Prepared for instant resume
+          restoredState = {
+            savedSession: {
+              ...saved,
+              quizTitle: foundQuiz.title,
+              quizBadge: foundQuiz.badge,
+              totalQuestions: foundQuiz.questions.length,
+              answeredCount: (saved.answers || []).filter(a => a && a.selectedIndices && a.selectedIndices.length > 0).length,
+            }
+          };
+        }
+      }
+
       return {
         ...state,
         loading: false,
         allQuestions: action.questions,
-        quizSets: buildQuizSets(action.questions),
+        quizSets: sets,
+        ...restoredState,
       };
+    }
+
     case 'LOAD_ERROR':
       return { ...state, loading: false, error: action.error };
 
@@ -74,20 +116,77 @@ function quizReducer(state, action) {
       const qCount = quiz.questions.length;
       const totalExamSeconds = (quiz.totalTimeMins || 90) * 60;
 
-      return {
+      const newAnswers = new Array(qCount).fill(null);
+      const newFlags = new Array(qCount).fill(false);
+
+      const newState = {
         ...state,
         page: 'quiz',
         mode,
         activeQuiz: quiz,
         currentIndex: 0,
-        answers: new Array(qCount).fill(null),
+        answers: newAnswers,
         pendingSelections: [],
-        flags: new Array(qCount).fill(false),
+        flags: newFlags,
         revealed: false,
         timeLeft: quiz.timePerQ || 60,
         examTimeLeft: totalExamSeconds,
         quizStartTime: Date.now(),
         showModeModal: false,
+        savedSession: null,
+      };
+
+      // Save initial state to storage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify({
+          quizId: quiz.id,
+          mode,
+          currentIndex: 0,
+          answers: newAnswers,
+          flags: newFlags,
+          timeLeft: quiz.timePerQ || 60,
+          examTimeLeft: totalExamSeconds,
+          quizStartTime: Date.now(),
+          timestamp: Date.now(),
+        }));
+      }
+
+      return newState;
+    }
+
+    case 'RESUME_SAVED_QUIZ': {
+      const saved = state.savedSession || getSavedSession();
+      if (!saved || !saved.quizId) return state;
+
+      const foundQuiz = state.quizSets.find(s => s.id === saved.quizId);
+      if (!foundQuiz) return state;
+
+      const currAns = saved.answers?.[saved.currentIndex || 0];
+
+      return {
+        ...state,
+        page: 'quiz',
+        mode: saved.mode || 'practice',
+        activeQuiz: foundQuiz,
+        currentIndex: saved.currentIndex || 0,
+        answers: saved.answers || new Array(foundQuiz.questions.length).fill(null),
+        flags: saved.flags || new Array(foundQuiz.questions.length).fill(false),
+        pendingSelections: currAns ? currAns.selectedIndices : [],
+        revealed: saved.mode === 'practice' ? currAns !== null && currAns !== undefined : false,
+        timeLeft: saved.timeLeft || foundQuiz.timePerQ || 60,
+        examTimeLeft: saved.examTimeLeft || (foundQuiz.totalTimeMins || 90) * 60,
+        quizStartTime: saved.quizStartTime || Date.now(),
+        savedSession: null,
+      };
+    }
+
+    case 'DISCARD_SAVED_QUIZ': {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_SESSION);
+      }
+      return {
+        ...state,
+        savedSession: null,
       };
     }
 
@@ -201,7 +300,7 @@ function quizReducer(state, action) {
           ...state,
           currentIndex: nextIdx,
           pendingSelections: nextAns ? nextAns.selectedIndices : [],
-          revealed: state.mode === 'practice' ? nextAns !== null : false,
+          revealed: state.mode === 'practice' ? nextAns !== null && nextAns !== undefined : false,
           timeLeft: state.activeQuiz.timePerQ || 60,
         };
       }
@@ -216,7 +315,7 @@ function quizReducer(state, action) {
           ...state,
           currentIndex: prevIdx,
           pendingSelections: prevAns ? prevAns.selectedIndices : [],
-          revealed: state.mode === 'practice' ? prevAns !== null : false,
+          revealed: state.mode === 'practice' ? prevAns !== null && prevAns !== undefined : false,
           timeLeft: state.activeQuiz.timePerQ || 60,
         };
       }
@@ -229,7 +328,7 @@ function quizReducer(state, action) {
         ...state,
         currentIndex: action.index,
         pendingSelections: targetAns ? targetAns.selectedIndices : [],
-        revealed: state.mode === 'practice' ? targetAns !== null : false,
+        revealed: state.mode === 'practice' ? targetAns !== null && targetAns !== undefined : false,
         timeLeft: state.activeQuiz.timePerQ || 60,
       };
     }
@@ -255,8 +354,11 @@ function quizReducer(state, action) {
       } else {
         // Exam mode countdown
         if (state.examTimeLeft <= 1) {
-          // Time's up in exam! Auto finish
-          return { ...state, examTimeLeft: 0, page: 'results' };
+          // Time's up in exam! Auto finish and clear cache
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(STORAGE_KEY_SESSION);
+          }
+          return { ...state, examTimeLeft: 0, page: 'results', savedSession: null };
         }
         return { ...state, examTimeLeft: state.examTimeLeft - 1 };
       }
@@ -265,17 +367,56 @@ function quizReducer(state, action) {
     case 'TOGGLE_THEME': {
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
       if (typeof window !== 'undefined') {
-        localStorage.setItem('quiz_theme', nextTheme);
+        localStorage.setItem(STORAGE_KEY_THEME, nextTheme);
         document.documentElement.setAttribute('data-theme', nextTheme);
       }
       return { ...state, theme: nextTheme };
     }
 
-    case 'FINISH_QUIZ':
-      return { ...state, page: 'results' };
+    case 'FINISH_QUIZ': {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_SESSION);
+      }
+      return { ...state, page: 'results', savedSession: null };
+    }
 
-    case 'GO_HOME':
-      return { ...initialState, allQuestions: state.allQuestions, quizSets: state.quizSets, loading: false, page: 'home' };
+    case 'GO_HOME': {
+      // Keep in-progress saved session in state when returning home
+      const currentActive = state.activeQuiz;
+      let updatedSaved = state.savedSession;
+
+      if (currentActive && state.page === 'quiz') {
+        const answeredCount = state.answers.filter(a => a && a.selectedIndices && a.selectedIndices.length > 0).length;
+        updatedSaved = {
+          quizId: currentActive.id,
+          quizTitle: currentActive.title,
+          quizBadge: currentActive.badge,
+          mode: state.mode,
+          currentIndex: state.currentIndex,
+          answers: state.answers,
+          flags: state.flags,
+          timeLeft: state.timeLeft,
+          examTimeLeft: state.examTimeLeft,
+          quizStartTime: state.quizStartTime,
+          totalQuestions: currentActive.questions.length,
+          answeredCount,
+          timestamp: Date.now(),
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(updatedSaved));
+        }
+      }
+
+      return {
+        ...initialState,
+        theme: state.theme,
+        allQuestions: state.allQuestions,
+        quizSets: state.quizSets,
+        loading: false,
+        page: 'home',
+        savedSession: updatedSaved,
+      };
+    }
 
     case 'GO_QUICK_LEARNING':
       return { ...state, page: 'quick-learning' };
@@ -284,18 +425,36 @@ function quizReducer(state, action) {
       const quiz = state.activeQuiz;
       const qCount = quiz.questions.length;
       const totalExamSeconds = (quiz.totalTimeMins || 90) * 60;
+      const newAnswers = new Array(qCount).fill(null);
+      const newFlags = new Array(qCount).fill(false);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify({
+          quizId: quiz.id,
+          mode: state.mode,
+          currentIndex: 0,
+          answers: newAnswers,
+          flags: newFlags,
+          timeLeft: quiz.timePerQ || 60,
+          examTimeLeft: totalExamSeconds,
+          quizStartTime: Date.now(),
+          timestamp: Date.now(),
+        }));
+      }
+
       return {
         ...state,
         page: 'quiz',
         activeQuiz: quiz,
         currentIndex: 0,
-        answers: new Array(qCount).fill(null),
+        answers: newAnswers,
         pendingSelections: [],
-        flags: new Array(qCount).fill(false),
+        flags: newFlags,
         revealed: false,
         timeLeft: quiz.timePerQ || 60,
         examTimeLeft: totalExamSeconds,
         quizStartTime: Date.now(),
+        savedSession: null,
       };
     }
 
@@ -318,6 +477,28 @@ export function QuizProvider({ children }) {
       .then(questions => dispatch({ type: 'LOAD_SUCCESS', questions }))
       .catch(err => dispatch({ type: 'LOAD_ERROR', error: err.message }));
   }, []);
+
+  // Sync active quiz progress to localStorage periodically & on state changes
+  useEffect(() => {
+    if (state.page === 'quiz' && state.activeQuiz) {
+      const sessionData = {
+        quizId: state.activeQuiz.id,
+        mode: state.mode,
+        currentIndex: state.currentIndex,
+        answers: state.answers,
+        flags: state.flags,
+        timeLeft: state.timeLeft,
+        examTimeLeft: state.examTimeLeft,
+        quizStartTime: state.quizStartTime,
+        timestamp: Date.now(),
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(sessionData));
+      } catch (e) {
+        console.error('Failed to sync session to localStorage:', e);
+      }
+    }
+  }, [state.page, state.activeQuiz, state.currentIndex, state.answers, state.flags, state.mode, state.examTimeLeft]);
 
   // Timer management
   useEffect(() => {
@@ -354,6 +535,14 @@ export function QuizProvider({ children }) {
     if (quiz) dispatch({ type: 'START_QUIZ', quiz, mode });
   }, [state.quizSets]);
 
+  const resumeSavedQuiz = useCallback(() => {
+    dispatch({ type: 'RESUME_SAVED_QUIZ' });
+  }, []);
+
+  const discardSavedQuiz = useCallback(() => {
+    dispatch({ type: 'DISCARD_SAVED_QUIZ' });
+  }, []);
+
   const toggleOption = useCallback((index) => {
     dispatch({ type: 'TOGGLE_OPTION', index });
   }, []);
@@ -381,6 +570,8 @@ export function QuizProvider({ children }) {
       openModeModal,
       closeModeModal,
       startQuiz,
+      resumeSavedQuiz,
+      discardSavedQuiz,
       toggleOption,
       submitMultiAnswer,
       toggleFlag,

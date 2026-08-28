@@ -3,15 +3,15 @@ import styles from './HomePage.module.css';
 import QuizCard from '../QuizCard/QuizCard';
 import ModeModal from '../ModeModal/ModeModal';
 import { useQuiz } from '../../context/QuizContext';
-import { CATEGORY_CONFIG } from '../../utils/constants';
+import { CATEGORY_CONFIG, formatTime } from '../../utils/constants';
 
 const ALL = 'All';
 const EXAM_SETS = 'Exam Sets';
 const DOMAINS = 'Domain Quizzes';
 
 export default function HomePage() {
-  const { state, openModeModal, startQuiz, goToQuickLearning } = useQuiz();
-  const { quizSets, loading, error } = state;
+  const { state, openModeModal, startQuiz, resumeSavedQuiz, discardSavedQuiz, goToQuickLearning } = useQuiz();
+  const { quizSets, loading, error, savedSession } = state;
 
   const [activeFilter, setActiveFilter] = useState(ALL);
 
@@ -50,6 +50,40 @@ export default function HomePage() {
   return (
     <div className={styles.page}>
       <ModeModal />
+
+      {/* ── In-Progress / Incomplete Exam Saved Banner ─────────── */}
+      {savedSession && (
+        <div className={`${styles.resumeBanner} animate-fadeInUp`}>
+          <div className={styles.resumeGlow} />
+          <div className={styles.resumeContent}>
+            <div className={styles.resumeLeft}>
+              <div className={styles.resumeIconBadge}>⏳</div>
+              <div>
+                <div className={styles.resumeTag}>
+                  Incomplete Session Saved • {savedSession.mode === 'exam' ? '⏱️ Real Exam Mode' : '⚡ Practice Mode'}
+                </div>
+                <h3 className={styles.resumeTitle}>{savedSession.quizTitle || 'In-Progress Exam Session'}</h3>
+                <p className={styles.resumeMeta}>
+                  <span>Progress: <strong>{savedSession.answeredCount || 0} / {savedSession.totalQuestions || 80}</strong> answered</span>
+                  <span>● Resume at Question <strong>{(savedSession.currentIndex || 0) + 1}</strong></span>
+                  {savedSession.mode === 'exam' && (
+                    <span>● Time Left: <strong>{formatTime(savedSession.examTimeLeft || 5400)}</strong></span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.resumeActions}>
+              <button className="btn btn-primary" onClick={resumeSavedQuiz}>
+                ▶️ Resume Exam
+              </button>
+              <button className={styles.discardBtn} onClick={discardSavedQuiz} title="Clear saved progress">
+                🗑️ Discard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Hero ─────────────────────────────────── */}
       <section className={`${styles.hero} animate-fadeInUp`}>
