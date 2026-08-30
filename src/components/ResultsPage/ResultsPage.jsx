@@ -4,15 +4,15 @@ import { useQuiz } from '../../context/QuizContext';
 import { RESULT_CONFIG, formatTime } from '../../utils/constants';
 
 export default function ResultsPage() {
-  const { state, restartQuiz, startQuiz, goHome } = useQuiz();
-  const { activeQuiz, answers, flags, quizStartTime, mode } = state;
+  const { state, restartQuiz, startQuiz, goHome, goToHistory } = useQuiz();
+  const { activeQuiz, answers, flags, quizStartTime, mode, isViewingPastResult, viewedResultDate } = state;
   const questions = activeQuiz?.questions || [];
 
   const [filter, setFilter] = useState('all'); // 'all' | 'incorrect' | 'correct' | 'flagged' | 'skipped'
 
   const correct = answers.filter(a => a?.isCorrect).length;
   const wrong   = answers.filter(a => a && !a.isCorrect && a.selectedIndices && a.selectedIndices.length > 0).length;
-  const skipped = answers.filter(a => !a || !a.selectedIndices || a.selectedIndices.length === 0).length;
+  const skipped = Math.max(0, questions.length - correct - wrong);
   const flagged = flags.filter(Boolean).length;
   const total   = questions.length;
   const pct     = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -44,8 +44,42 @@ export default function ResultsPage() {
       return true;
     });
 
+  const formatDate = (isoString) => {
+    if (!isoString) return '';
+    try {
+      return new Date(isoString).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return isoString;
+    }
+  };
+
   return (
     <div className={styles.page}>
+      {/* ── Saved History Notice Banner ───────────────────────── */}
+      <div className={styles.historySavedBanner}>
+        {isViewingPastResult ? (
+          <>
+            <span>📜 Viewing Past Exam Record from <strong>{formatDate(viewedResultDate)}</strong></span>
+            <button className="btn btn-secondary btn-sm" onClick={goToHistory}>
+              ← Back to My Progress
+            </button>
+          </>
+        ) : (
+          <>
+            <span>💾 <strong>Exam Submitted &amp; Saved!</strong> You can revisit this score report anytime under <strong>My Progress</strong>.</span>
+            <button className="btn btn-secondary btn-sm" onClick={goToHistory}>
+              📊 View All Past Attempts
+            </button>
+          </>
+        )}
+      </div>
+
       {/* ── Top Header ────────────────────────────────────────── */}
       <div className={`${styles.header} animate-bounceIn`}>
         <div className={styles.passBadge} style={{ background: isPassed ? 'rgba(29, 185, 84, 0.15)' : 'rgba(231, 76, 60, 0.15)', color: isPassed ? '#1db954' : '#e74c3c' }}>
@@ -107,8 +141,11 @@ export default function ResultsPage() {
         <button className="btn btn-secondary btn-lg" onClick={() => startQuiz(activeQuiz.id, mode === 'exam' ? 'practice' : 'exam')}>
           {mode === 'exam' ? '⚡ Switch to Practice Mode' : '⏱️ Try Real Exam Simulation'}
         </button>
+        <button className="btn btn-ghost btn-lg" onClick={goToHistory}>
+          📊 My Progress History
+        </button>
         <button className="btn btn-ghost btn-lg" onClick={goHome}>
-          🏠 Back to All Quizzes
+          🏠 Browse All Quizzes
         </button>
       </div>
 

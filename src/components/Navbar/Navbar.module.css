@@ -96,6 +96,19 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.navCountBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  margin-left: 4px;
+}
+
 /* ── Right side ──────────────────────────────────────────────── */
 .right {
   display: flex;

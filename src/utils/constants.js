@@ -83,53 +83,71 @@ export function getDominantDifficulty(questions) {
 export function buildQuizSets(allQuestions) {
   const sets = [];
   const total = allQuestions.length;
-  const half = Math.ceil(total / 2);
 
-  // 1. Exam Set 1 (Questions 1 to 76)
-  const set1Questions = allQuestions.slice(0, half);
+  // 1. Exam Set 1 (Questions 1 to 55)
+  const set1Questions = allQuestions.slice(0, 55);
   sets.push({
     id: 'set-1',
     title: `CIS-DF Practice Exam 1 (${set1Questions.length} Qs)`,
     badge: 'Exam Set 1',
-    description: `Comprehensive mock exam 1 with ${set1Questions.length} questions covering IRE, CMDB Health, CSDM, and Governance.`,
+    description: `Foundational mock exam 1 with ${set1Questions.length} questions covering IRE, CMDB Health, CSDM Foundation, and Lifecycle.`,
     category: 'Mixed',
     questions: set1Questions,
-    timePerQ: 60, // 60s per Q in practice mode
-    totalTimeMins: Math.round((set1Questions.length * 75) / 60), // ~95 mins for real exam mode
+    timePerQ: 60,
+    totalTimeMins: Math.round((set1Questions.length * 75) / 60),
     featured: true,
     isExamSet: true,
+    accentGlow: 'linear-gradient(135deg, #a435f0, #c56af5)'
   });
 
-  // 2. Exam Set 2 (Questions 77 to 153)
-  const set2Questions = allQuestions.slice(half);
+  // 2. Exam Set 2 (Questions 56 to 110)
+  const set2Questions = allQuestions.slice(55, 110);
   sets.push({
     id: 'set-2',
     title: `CIS-DF Practice Exam 2 (${set2Questions.length} Qs)`,
     badge: 'Exam Set 2',
-    description: `Comprehensive mock exam 2 with ${set2Questions.length} questions covering Data Manager, Ingestion, Workspaces, and CSDM 5.0.`,
+    description: `Intermediate mock exam 2 with ${set2Questions.length} questions covering Data Manager, Ingestion, Workspaces, and CSDM 5.0.`,
     category: 'Mixed',
     questions: set2Questions,
     timePerQ: 60,
     totalTimeMins: Math.round((set2Questions.length * 75) / 60),
     featured: true,
     isExamSet: true,
+    accentGlow: 'linear-gradient(135deg, #f69c08, #ffb347)'
   });
 
-  // 3. Complete Question Bank (All 153 Qs)
+  // 3. Exam Set 3 (PDFs Official Exam Dumps Set - Questions 111 to 160)
+  const set3Questions = allQuestions.slice(110);
+  sets.push({
+    id: 'set-3',
+    title: `CIS-DF Practice Exam 3 - PDF Dumps (${set3Questions.length} Qs)`,
+    badge: 'Exam Set 3 (PDFs Dumps)',
+    description: `Authentic exam scenarios from official PDF dumps (Gregory, Taylor, Case, Marshall, Valdez) covering Advanced IRE, CMDB 360, Unified Map & Playbooks.`,
+    category: 'Mixed',
+    questions: set3Questions,
+    timePerQ: 60,
+    totalTimeMins: Math.round((set3Questions.length * 75) / 60),
+    featured: true,
+    isExamSet: true,
+    accentGlow: 'linear-gradient(135deg, #00bcd4, #61dafb)'
+  });
+
+  // 4. Complete Master Bank (All 160 Qs)
   sets.push({
     id: 'full',
     title: `Complete CIS-DF Master Bank (${total} Qs)`,
     badge: 'Full Question Bank',
-    description: `The complete question bank with all ${total} questions for comprehensive preparation.`,
+    description: `The complete question bank with all ${total} questions for complete multi-domain CIS-DF mastery.`,
     category: 'Mixed',
     questions: allQuestions,
     timePerQ: 60,
     totalTimeMins: Math.round((total * 75) / 60),
     featured: true,
     isExamSet: true,
+    accentGlow: 'linear-gradient(135deg, #1db954, #2ecc71)'
   });
 
-  // 4. Per-category domain quizzes
+  // 5. Per-category domain quizzes
   const categoryDescriptions = {
     'IRE & Reconciliation': 'Master Identification Rules, Reconciliation Rules, Dynamic Reconciliation, and De-duplication logic.',
     'CMDB Health & Dashboards': 'Test your knowledge on Completeness, Correctness, Compliance KPIs, Staleness, and Inclusion Rules.',
@@ -146,7 +164,7 @@ export function buildQuizSets(allQuestions) {
       sets.push({
         id: cat.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         title: `${cat}`,
-        badge: 'Domain Quiz',
+        badge: 'Domain Drill',
         description: categoryDescriptions[cat] || `Practice ${qs.length} curated questions on ${cat}.`,
         category: cat,
         questions: qs,

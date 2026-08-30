@@ -2,11 +2,12 @@ import styles from './Navbar.module.css';
 import { useQuiz } from '../../context/QuizContext';
 
 export default function Navbar() {
-  const { state, toggleTheme, goHome, goToQuickLearning } = useQuiz();
-  const { page, allQuestions, answers, theme } = state;
+  const { state, toggleTheme, goHome, goToHistory, goToQuickLearning } = useQuiz();
+  const { page, allQuestions, answers, theme, examHistory } = state;
 
   const answeredCount = answers.filter(Boolean).length;
   const correctCount = answers.filter(a => a?.isCorrect).length;
+  const historyCount = examHistory?.length || 0;
 
   return (
     <nav className={styles.nav}>
@@ -28,10 +29,16 @@ export default function Navbar() {
             📝 Practice Exams
           </button>
           <button
+            className={`${styles.navLink} ${page === 'history' ? styles.navLinkActive : ''}`}
+            onClick={goToHistory}
+          >
+            📊 My Progress {historyCount > 0 && <span className={styles.navCountBadge}>{historyCount}</span>}
+          </button>
+          <button
             className={`${styles.navLink} ${page === 'quick-learning' ? styles.navLinkActive : ''}`}
             onClick={goToQuickLearning}
           >
-            ⚡ Quick Learning Cheat Sheet
+            ⚡ Quick Learning
           </button>
         </div>
 
@@ -39,7 +46,7 @@ export default function Navbar() {
         <div className={styles.right}>
           <div className={styles.badge}>
             <span>📚</span>
-            <span>{allQuestions.length || 153} Questions</span>
+            <span>{allQuestions.length || 160} Questions</span>
           </div>
 
           {page === 'quiz' && answeredCount > 0 && (

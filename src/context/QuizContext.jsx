@@ -3,6 +3,7 @@ import { shuffle, buildQuizSets } from '../utils/constants';
 
 const STORAGE_KEY_SESSION = 'cis_df_active_session';
 const STORAGE_KEY_THEME = 'quiz_theme';
+const STORAGE_KEY_HISTORY = 'cis_df_exam_history';
 
 // ─── State Shape ──────────────────────────────────────────────
 const getInitialTheme = () => {
@@ -25,9 +26,21 @@ const getSavedSession = () => {
   return null;
 };
 
+const getSavedHistory = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_HISTORY);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.error('Failed to parse exam history:', e);
+    }
+  }
+  return [];
+};
+
 const initialState = {
   theme: getInitialTheme(),
-  page: 'home',          // 'home' | 'quiz' | 'results' | 'quick-learning'
+  page: 'home',          // 'home' | 'quiz' | 'results' | 'history' | 'quick-learning'
   mode: 'practice',      // 'practice' (instant answers) | 'exam' (real test, answers at end)
   allQuestions: [],
   quizSets: [],
@@ -36,6 +49,9 @@ const initialState = {
 
   // Persistent in-progress session metadata
   savedSession: getSavedSession(),
+
+  // Persistent completed exam history records
+  examHistory: getSavedHistory(),
 
   // Selected quiz setup
   selectedQuizId: null,
@@ -51,6 +67,10 @@ const initialState = {
   timeLeft: 60,          // per-question timer for practice mode
   examTimeLeft: 5400,    // overall seconds for real exam mode
   quizStartTime: null,
+
+  // Result metadata (for current/viewed attempt)
+  isViewingPastResult: false,
+  viewedResultDate: null,
 };
 
 function arraysEqual(a, b) {
@@ -60,6 +80,42 @@ function arraysEqual(a, b) {
   return sortedA.every((val, idx) => val === sortedB[idx]);
 }
 
+function calculateResultRecord(state) {
+  const quiz = state.activeQuiz;
+  if (!quiz) return null;
+
+  const questions = quiz.questions || [];
+  const answers = state.answers || [];
+  const flags = state.flags || [];
+
+  const total = questions.length;
+  const correct = answers.filter(a => a?.isCorrect).length;
+  const wrong = answers.filter(a => a && !a.isCorrect && a.selectedIndices && a.selectedIndices.length > 0).length;
+  const skipped = total - correct - wrong;
+  const flagged = flags.filter(Boolean).length;
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const timeSpent = Math.max(1, Math.round((Date.now() - (state.quizStartTime || Date.now())) / 1000));
+
+  return {
+    id: `result_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    quizId: quiz.id,
+    quizTitle: quiz.title,
+    mode: state.mode,
+    date: new Date().toISOString(),
+    total,
+    correct,
+    wrong,
+    skipped,
+    flagged,
+    pct,
+    passed: pct >= 70,
+    timeSpent,
+    answers: [...answers],
+    flags: [...flags],
+    questions: [...questions],
+  };
+}
+
 // ─── Reducer ─────────────────────────────────────────────────
 function quizReducer(state, action) {
   switch (action.type) {
@@ -67,12 +123,10 @@ function quizReducer(state, action) {
       const sets = buildQuizSets(action.questions);
       let restoredState = {};
 
-      // If there is an active session in local storage, link the quiz object
       const saved = state.savedSession;
       if (saved && saved.quizId) {
         const foundQuiz = sets.find(s => s.id === saved.quizId);
         if (foundQuiz) {
-          // Prepared for instant resume
           restoredState = {
             savedSession: {
               ...saved,
@@ -134,9 +188,10 @@ function quizReducer(state, action) {
         quizStartTime: Date.now(),
         showModeModal: false,
         savedSession: null,
+        isViewingPastResult: false,
+        viewedResultDate: null,
       };
 
-      // Save initial state to storage
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify({
           quizId: quiz.id,
@@ -177,6 +232,8 @@ function quizReducer(state, action) {
         examTimeLeft: saved.examTimeLeft || (foundQuiz.totalTimeMins || 90) * 60,
         quizStartTime: saved.quizStartTime || Date.now(),
         savedSession: null,
+        isViewingPastResult: false,
+        viewedResultDate: null,
       };
     }
 
@@ -199,7 +256,6 @@ function quizReducer(state, action) {
         if (state.revealed) return state;
 
         if (!isMulti) {
-          // Single choice in practice mode: immediate submit
           const isCorrect = arraysEqual([action.index], targetIndices);
           const timeSpent = (state.activeQuiz.timePerQ || 60) - state.timeLeft;
 
@@ -217,7 +273,6 @@ function quizReducer(state, action) {
             answers: newAnswers,
           };
         } else {
-          // Multi-select toggle before submit
           const exists = state.pendingSelections.includes(action.index);
           const updated = exists
             ? state.pendingSelections.filter(i => i !== action.index)
@@ -226,9 +281,7 @@ function quizReducer(state, action) {
           return { ...state, pendingSelections: updated };
         }
       } else {
-        // EXAM MODE: Selection without immediate reveal
         if (!isMulti) {
-          // Single choice in exam mode
           const isCorrect = arraysEqual([action.index], targetIndices);
           const newAnswers = [...state.answers];
           newAnswers[state.currentIndex] = {
@@ -242,7 +295,6 @@ function quizReducer(state, action) {
             answers: newAnswers,
           };
         } else {
-          // Multi-select in exam mode
           const exists = state.pendingSelections.includes(action.index);
           const updated = exists
             ? state.pendingSelections.filter(i => i !== action.index)
@@ -352,13 +404,26 @@ function quizReducer(state, action) {
         }
         return { ...state, timeLeft: state.timeLeft - 1 };
       } else {
-        // Exam mode countdown
         if (state.examTimeLeft <= 1) {
-          // Time's up in exam! Auto finish and clear cache
+          // Time's up in exam! Auto finish, save to history, and clear cache
+          const newRecord = calculateResultRecord(state);
+          const updatedHistory = newRecord ? [newRecord, ...state.examHistory] : state.examHistory;
+
           if (typeof window !== 'undefined') {
             localStorage.removeItem(STORAGE_KEY_SESSION);
+            if (newRecord) {
+              localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(updatedHistory));
+            }
           }
-          return { ...state, examTimeLeft: 0, page: 'results', savedSession: null };
+          return {
+            ...state,
+            examTimeLeft: 0,
+            page: 'results',
+            savedSession: null,
+            examHistory: updatedHistory,
+            isViewingPastResult: false,
+            viewedResultDate: newRecord?.date || null,
+          };
         }
         return { ...state, examTimeLeft: state.examTimeLeft - 1 };
       }
@@ -374,14 +439,72 @@ function quizReducer(state, action) {
     }
 
     case 'FINISH_QUIZ': {
+      const newRecord = calculateResultRecord(state);
+      const updatedHistory = newRecord ? [newRecord, ...state.examHistory] : state.examHistory;
+
       if (typeof window !== 'undefined') {
         localStorage.removeItem(STORAGE_KEY_SESSION);
+        if (newRecord) {
+          localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(updatedHistory));
+        }
       }
-      return { ...state, page: 'results', savedSession: null };
+
+      return {
+        ...state,
+        page: 'results',
+        savedSession: null,
+        examHistory: updatedHistory,
+        isViewingPastResult: false,
+        viewedResultDate: newRecord?.date || null,
+      };
     }
 
+    case 'VIEW_PAST_RESULT': {
+      const record = action.record;
+      if (!record) return state;
+
+      return {
+        ...state,
+        page: 'results',
+        mode: record.mode || 'exam',
+        activeQuiz: {
+          id: record.quizId,
+          title: record.quizTitle,
+          questions: record.questions || [],
+        },
+        answers: record.answers || [],
+        flags: record.flags || [],
+        quizStartTime: Date.now() - (record.timeSpent * 1000),
+        isViewingPastResult: true,
+        viewedResultDate: record.date,
+      };
+    }
+
+    case 'DELETE_HISTORY_ITEM': {
+      const updatedHistory = state.examHistory.filter(item => item.id !== action.id);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(updatedHistory));
+      }
+      return {
+        ...state,
+        examHistory: updatedHistory,
+      };
+    }
+
+    case 'CLEAR_ALL_HISTORY': {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY_HISTORY);
+      }
+      return {
+        ...state,
+        examHistory: [],
+      };
+    }
+
+    case 'GO_HISTORY':
+      return { ...state, page: 'history' };
+
     case 'GO_HOME': {
-      // Keep in-progress saved session in state when returning home
       const currentActive = state.activeQuiz;
       let updatedSaved = state.savedSession;
 
@@ -412,6 +535,7 @@ function quizReducer(state, action) {
         theme: state.theme,
         allQuestions: state.allQuestions,
         quizSets: state.quizSets,
+        examHistory: state.examHistory,
         loading: false,
         page: 'home',
         savedSession: updatedSaved,
@@ -455,6 +579,8 @@ function quizReducer(state, action) {
         examTimeLeft: totalExamSeconds,
         quizStartTime: Date.now(),
         savedSession: null,
+        isViewingPastResult: false,
+        viewedResultDate: null,
       };
     }
 
@@ -518,48 +644,27 @@ export function QuizProvider({ children }) {
     document.documentElement.setAttribute('data-theme', state.theme);
   }, [state.theme]);
 
-  const toggleTheme = useCallback(() => {
-    dispatch({ type: 'TOGGLE_THEME' });
-  }, []);
-
-  const openModeModal = useCallback((quizId) => {
-    dispatch({ type: 'OPEN_MODE_MODAL', quizId });
-  }, []);
-
-  const closeModeModal = useCallback(() => {
-    dispatch({ type: 'CLOSE_MODE_MODAL' });
-  }, []);
-
+  const toggleTheme = useCallback(() => dispatch({ type: 'TOGGLE_THEME' }), []);
+  const openModeModal = useCallback((quizId) => dispatch({ type: 'OPEN_MODE_MODAL', quizId }), []);
+  const closeModeModal = useCallback(() => dispatch({ type: 'CLOSE_MODE_MODAL' }), []);
   const startQuiz = useCallback((quizId, mode = 'practice') => {
     const quiz = state.quizSets.find(s => s.id === quizId);
     if (quiz) dispatch({ type: 'START_QUIZ', quiz, mode });
   }, [state.quizSets]);
-
-  const resumeSavedQuiz = useCallback(() => {
-    dispatch({ type: 'RESUME_SAVED_QUIZ' });
-  }, []);
-
-  const discardSavedQuiz = useCallback(() => {
-    dispatch({ type: 'DISCARD_SAVED_QUIZ' });
-  }, []);
-
-  const toggleOption = useCallback((index) => {
-    dispatch({ type: 'TOGGLE_OPTION', index });
-  }, []);
-
-  const submitMultiAnswer = useCallback(() => {
-    dispatch({ type: 'SUBMIT_MULTI_ANSWER' });
-  }, []);
-
-  const toggleFlag = useCallback(() => {
-    dispatch({ type: 'TOGGLE_FLAG' });
-  }, []);
-
+  const resumeSavedQuiz = useCallback(() => dispatch({ type: 'RESUME_SAVED_QUIZ' }), []);
+  const discardSavedQuiz = useCallback(() => dispatch({ type: 'DISCARD_SAVED_QUIZ' }), []);
+  const toggleOption = useCallback((index) => dispatch({ type: 'TOGGLE_OPTION', index }), []);
+  const submitMultiAnswer = useCallback(() => dispatch({ type: 'SUBMIT_MULTI_ANSWER' }), []);
+  const toggleFlag = useCallback(() => dispatch({ type: 'TOGGLE_FLAG' }), []);
   const nextQuestion = useCallback(() => dispatch({ type: 'NEXT_QUESTION' }), []);
   const prevQuestion = useCallback(() => dispatch({ type: 'PREV_QUESTION' }), []);
   const jumpToQuestion = useCallback((i) => dispatch({ type: 'JUMP_QUESTION', index: i }), []);
   const finishQuiz = useCallback(() => dispatch({ type: 'FINISH_QUIZ' }), []);
+  const viewPastResult = useCallback((record) => dispatch({ type: 'VIEW_PAST_RESULT', record }), []);
+  const deleteHistoryItem = useCallback((id) => dispatch({ type: 'DELETE_HISTORY_ITEM', id }), []);
+  const clearAllHistory = useCallback(() => dispatch({ type: 'CLEAR_ALL_HISTORY' }), []);
   const goHome = useCallback(() => dispatch({ type: 'GO_HOME' }), []);
+  const goToHistory = useCallback(() => dispatch({ type: 'GO_HISTORY' }), []);
   const goToQuickLearning = useCallback(() => dispatch({ type: 'GO_QUICK_LEARNING' }), []);
   const restartQuiz = useCallback(() => dispatch({ type: 'RESTART_QUIZ' }), []);
 
@@ -579,7 +684,11 @@ export function QuizProvider({ children }) {
       prevQuestion,
       jumpToQuestion,
       finishQuiz,
+      viewPastResult,
+      deleteHistoryItem,
+      clearAllHistory,
       goHome,
+      goToHistory,
       goToQuickLearning,
       restartQuiz
     }}>

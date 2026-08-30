@@ -10,11 +10,12 @@ const EXAM_SETS = 'Exam Sets';
 const DOMAINS = 'Domain Quizzes';
 
 export default function HomePage() {
-  const { state, openModeModal, startQuiz, resumeSavedQuiz, discardSavedQuiz, goToQuickLearning } = useQuiz();
-  const { quizSets, loading, error, savedSession } = state;
+  const { state, openModeModal, startQuiz, resumeSavedQuiz, discardSavedQuiz, goToHistory, goToQuickLearning } = useQuiz();
+  const { quizSets, loading, error, savedSession, examHistory } = state;
 
   const [activeFilter, setActiveFilter] = useState(ALL);
 
+  const historyCount = examHistory?.length || 0;
   const examSets = quizSets.filter(s => s.isExamSet);
   const domainSets = quizSets.filter(s => !s.isExamSet);
 
@@ -46,6 +47,7 @@ export default function HomePage() {
 
   const set1 = quizSets.find(s => s.id === 'set-1');
   const set2 = quizSets.find(s => s.id === 'set-2');
+  const set3 = quizSets.find(s => s.id === 'set-3');
 
   return (
     <div className={styles.page}>
@@ -93,26 +95,34 @@ export default function HomePage() {
           <span className={styles.heroGradient}>Data Foundations (CIS-DF)</span>
         </h1>
         <p className={styles.heroSubtitle}>
-          Master the ServiceNow CMDB &amp; CSDM with 160 exam questions divided into two balanced 80-question mock exams, multi-select scenarios, rich explanations, and real exam simulations.
+          Master the ServiceNow CMDB &amp; CSDM with 160 exam questions divided into <strong>three targeted mock exam sets</strong>, multi-select scenarios, rich technical rationales, and real exam simulations.
         </p>
 
         {/* Hero Quick Start Actions */}
         <div className={styles.heroActions}>
           <button className="btn btn-primary btn-lg" onClick={() => openModeModal('set-1')}>
-            🚀 Practice Exam 1 (80 Qs)
+            🚀 Exam Set 1 (55 Qs)
           </button>
           <button className="btn btn-secondary btn-lg" onClick={() => openModeModal('set-2')}>
-            🎯 Practice Exam 2 (80 Qs)
+            🎯 Exam Set 2 (55 Qs)
           </button>
+          <button className="btn btn-primary btn-lg" style={{ background: 'linear-gradient(135deg, #00bcd4, #0097a7)' }} onClick={() => openModeModal('set-3')}>
+            📄 Exam Set 3 - PDF Dumps (50 Qs)
+          </button>
+          {historyCount > 0 && (
+            <button className="btn btn-secondary btn-lg" onClick={goToHistory}>
+              📊 My Progress ({historyCount})
+            </button>
+          )}
           <button className="btn btn-ghost btn-lg" onClick={goToQuickLearning}>
-            ⚡ Quick Learning Cheat Sheet
+            ⚡ Cheat Sheet
           </button>
         </div>
 
         <div className={styles.heroStats}>
           {[
             { val: '160', label: 'Exam Questions' },
-            { val: '2',   label: '80-Q Exam Sets' },
+            { val: '3',   label: 'Full Exam Sets' },
             { val: '2',   label: 'Test Modes' },
             { val: '6',   label: 'Domain Quizzes' },
           ].map((s, i) => (
@@ -125,7 +135,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Exam Sets Highlight (Udemy-Style) ──────── */}
+      {/* ── Exam Sets Highlight (3 Sets Showcase) ──── */}
       <section className={styles.examSetsShowcase}>
         <div className={styles.sectionHeader}>
           <div>
@@ -133,7 +143,7 @@ export default function HomePage() {
             <h2 className={styles.sectionTitle}>Full-Length Practice Exams</h2>
           </div>
           <p className={styles.sectionHeaderDesc}>
-            Choose between <strong>⚡ Practice Mode</strong> (instant answers &amp; explanations) or <strong>⏱️ Real Exam Mode</strong> (timed simulation with score report at the end).
+            Choose between <strong>⚡ Practice Mode</strong> (instant answers &amp; explanations) or <strong>⏱️ Real Exam Mode</strong> (timed simulation with full score report at the end).
           </p>
         </div>
 
@@ -144,22 +154,22 @@ export default function HomePage() {
               <div className={styles.examCardGlow} style={{ background: 'linear-gradient(135deg, #a435f0, #c56af5)' }} />
               <div className={styles.examCardBody}>
                 <div className={styles.examCardTop}>
-                  <span className={styles.examPill}>Set 1 of 2</span>
-                  <span className={styles.examTimeTag}>⏱️ ~95 min</span>
+                  <span className={styles.examPill}>Set 1 of 3</span>
+                  <span className={styles.examTimeTag}>⏱️ ~70 min</span>
                 </div>
                 <h3 className={styles.examCardTitle}>{set1.title}</h3>
                 <p className={styles.examCardDesc}>{set1.description}</p>
                 <div className={styles.examCardMeta}>
-                  <span>📝 80 Questions</span>
+                  <span>📝 55 Questions</span>
                   <span>● 70% Pass Mark</span>
-                  <span>● IRE, Health &amp; CSDM</span>
+                  <span>● Core IRE &amp; Health</span>
                 </div>
                 <div className={styles.examCardButtons}>
                   <button className="btn btn-secondary" onClick={() => startQuiz('set-1', 'practice')}>
-                    ⚡ Practice Mode (Instant)
+                    ⚡ Practice
                   </button>
                   <button className="btn btn-primary" onClick={() => startQuiz('set-1', 'exam')}>
-                    ⏱️ Real Exam Simulation
+                    ⏱️ Real Exam
                   </button>
                 </div>
               </div>
@@ -172,22 +182,50 @@ export default function HomePage() {
               <div className={styles.examCardGlow} style={{ background: 'linear-gradient(135deg, #f69c08, #ffb347)' }} />
               <div className={styles.examCardBody}>
                 <div className={styles.examCardTop}>
-                  <span className={styles.examPill} style={{ background: 'rgba(246, 156, 8, 0.15)', color: '#ffc85e' }}>Set 2 of 2</span>
-                  <span className={styles.examTimeTag}>⏱️ ~95 min</span>
+                  <span className={styles.examPill} style={{ background: 'rgba(246, 156, 8, 0.15)', color: '#ffc85e' }}>Set 2 of 3</span>
+                  <span className={styles.examTimeTag}>⏱️ ~70 min</span>
                 </div>
                 <h3 className={styles.examCardTitle}>{set2.title}</h3>
                 <p className={styles.examCardDesc}>{set2.description}</p>
                 <div className={styles.examCardMeta}>
-                  <span>📝 80 Questions</span>
+                  <span>📝 55 Questions</span>
                   <span>● 70% Pass Mark</span>
-                  <span>● Governance, Ingestion &amp; 5.0</span>
+                  <span>● Data Manager &amp; CSDM</span>
                 </div>
                 <div className={styles.examCardButtons}>
                   <button className="btn btn-secondary" onClick={() => startQuiz('set-2', 'practice')}>
-                    ⚡ Practice Mode (Instant)
+                    ⚡ Practice
                   </button>
                   <button className="btn btn-primary" onClick={() => startQuiz('set-2', 'exam')}>
-                    ⏱️ Real Exam Simulation
+                    ⏱️ Real Exam
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Exam Set 3 - PDF Dumps */}
+          {set3 && (
+            <div className={styles.featuredExamCard}>
+              <div className={styles.examCardGlow} style={{ background: 'linear-gradient(135deg, #00bcd4, #61dafb)' }} />
+              <div className={styles.examCardBody}>
+                <div className={styles.examCardTop}>
+                  <span className={styles.examPill} style={{ background: 'rgba(0, 188, 212, 0.15)', color: '#26c6da' }}>Set 3 of 3 (PDF Dumps)</span>
+                  <span className={styles.examTimeTag}>⏱️ ~65 min</span>
+                </div>
+                <h3 className={styles.examCardTitle}>{set3.title}</h3>
+                <p className={styles.examCardDesc}>{set3.description}</p>
+                <div className={styles.examCardMeta}>
+                  <span>📝 50 Questions</span>
+                  <span>● 70% Pass Mark</span>
+                  <span>● Official PDF Dumps</span>
+                </div>
+                <div className={styles.examCardButtons}>
+                  <button className="btn btn-secondary" onClick={() => startQuiz('set-3', 'practice')}>
+                    ⚡ Practice
+                  </button>
+                  <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #00bcd4, #0097a7)' }} onClick={() => startQuiz('set-3', 'exam')}>
+                    ⏱️ Real Exam
                   </button>
                 </div>
               </div>
