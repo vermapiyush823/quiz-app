@@ -932,7 +932,7 @@
       "Certification Policies, Data Filters, Scheduled Jobs"
     ],
     "correctIndices": [
-      2
+      3
     ],
     "explanation": "Compliance scorecards require a Certification Filter (defining qualifying CIs), a Certification Template (defining audit conditions/patch requirements), and an Audit definition."
   },
